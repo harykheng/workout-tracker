@@ -7,15 +7,17 @@ import { IconChevronLeft, IconChevronRight } from './ui/Icons.jsx';
 const DOW = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
 
 const KIND = {
-  cycle: { dot: 'bg-lime-accent', ring: 'ring-lime-accent/40', label: 'Workout' },
-  padel: { dot: 'bg-amber-400', ring: 'ring-amber-400/40', label: 'Padel' },
-  swim: { dot: 'bg-sky-400', ring: 'ring-sky-400/40', label: 'Swim / rest' },
+  cycle: { dot: 'bg-lime-accent', label: 'Workout' },
+  padel: { dot: 'bg-amber-400', label: 'Padel' },
+  swim: { dot: 'bg-sky-400', label: 'Swim' },
+  custom: { dot: 'bg-violet-400', label: 'Lainnya' },
 };
 
 function kindOf(sessions) {
   if (sessions.some((s) => !s.special)) return 'cycle';
   if (sessions.some((s) => s.dayId === 'padel')) return 'padel';
-  return 'swim';
+  if (sessions.some((s) => s.dayId === 'swim')) return 'swim';
+  return 'custom';
 }
 
 export default function HistoryCalendar({ sessions, onPickDate }) {
@@ -112,7 +114,7 @@ export default function HistoryCalendar({ sessions, onPickDate }) {
         })}
       </div>
 
-      <div className="flex items-center justify-center gap-4 mt-3.5 pt-3 border-t border-white/5">
+      <div className="flex items-center justify-center gap-3 mt-3.5 pt-3 border-t border-white/5 flex-wrap">
         {Object.entries(KIND).map(([k, v]) => (
           <span key={k} className="inline-flex items-center gap-1.5 text-[10.5px] text-muted">
             <span className={cx('w-2 h-2 rounded-full', v.dot)} />

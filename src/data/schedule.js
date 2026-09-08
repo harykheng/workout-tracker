@@ -279,6 +279,7 @@ export const SPECIAL_DAYS = [
     tag: 'Leg + Cardio',
     special: true,
     blurb: 'Auto-log sebagai leg + cardio. Gak perlu leg day terpisah.',
+    short: 'Leg + cardio',
     detail: '1-2x seminggu. Setelah ini, tandai "baru padel" biar leg sprinkle di Hari 4 otomatis dikasih peringatan.',
     fields: [
       { key: 'durationMin', label: 'Durasi main', unit: 'menit', placeholder: '90' },
@@ -291,15 +292,40 @@ export const SPECIAL_DAYS = [
     tag: 'Recovery',
     special: true,
     blurb: 'Renang 20-30 menit, pace santai-sedang.',
+    short: 'Renang 20-30 menit',
     detail: 'Taruh setelah hari terberat — biasanya sehabis Hari 2 atau Hari 4.',
     fields: [
       { key: 'durationMin', label: 'Durasi renang', unit: 'menit', placeholder: '25' },
       { key: 'intensity', label: 'Pace', type: 'select', options: ['Santai', 'Sedang'] },
     ],
   },
+  {
+    id: 'custom',
+    title: 'Aktivitas lain',
+    tag: 'Custom',
+    special: true,
+    custom: true,
+    blurb: 'Lari, hiking, badminton — tulis sendiri namanya.',
+    short: 'Nama isi sendiri',
+    detail:
+      'Isi nama aktivitas, durasi, dan intensitas. Masuk ke streak & kalender sebagai hari aktif, dan tidak menggeser urutan siklus 4 hari.',
+    fields: [
+      { key: 'name', label: 'Nama aktivitas', type: 'text', placeholder: 'Lari sore, hiking, badminton…', required: true },
+      { key: 'durationMin', label: 'Durasi', unit: 'menit', placeholder: '45' },
+      { key: 'intensity', label: 'Intensitas', type: 'select', options: ['Santai', 'Sedang', 'Berat'] },
+    ],
+  },
 ];
 
 export const ALL_DAYS = [...CYCLE_DAYS, ...SPECIAL_DAYS];
+
+/** Judul yang ditampilkan untuk sebuah sesi — hari custom pakai nama isian user. */
+export function sessionTitle(session) {
+  const day = getDay(session?.dayId);
+  if (!day) return session?.dayId || 'Sesi';
+  if (day.custom) return session?.meta?.name?.trim() || day.title;
+  return day.special ? day.title : `Hari ${day.num} — ${day.title}`;
+}
 
 export function getDay(id) {
   return ALL_DAYS.find((d) => d.id === id) || null;

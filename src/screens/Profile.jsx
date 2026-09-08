@@ -187,8 +187,9 @@ export default function Profile() {
         <Card className="p-4 space-y-3.5">
           <p className="flex gap-2 text-[12px] text-muted leading-relaxed">
             <IconInfo size={14} className="shrink-0 mt-0.5" />
-            Urutan: wger API (gratis, tanpa key) → ExerciseDB → placeholder nama + ikon. Kalau dua-duanya gagal, app tetap
-            jalan normal, cuma gambarnya diganti inisial gerakan.
+            Semua gerakan di program ini gambarnya sudah ikut di-bundle (2 frame, dianimasikan) — jalan offline, tanpa
+            request keluar. Untuk gerakan yang belum ada gambarnya, app cari ke wger API (gratis, tanpa key) lalu
+            ExerciseDB; kalau dua-duanya gagal, tampil inisial gerakan dan app tetap jalan normal.
           </p>
           <Field label="ExerciseDB base URL" hint="Kosongkan kalau gak dipakai.">
             <Input

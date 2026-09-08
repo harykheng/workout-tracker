@@ -21,8 +21,9 @@ Buka di HP lewat jaringan lokal: `npm run dev -- --host`.
 | 3 | Chest + bicep | — |
 | 4 | Shoulder + back round 2 | Ada leg sprinkle yang otomatis di-skip kalau baru padel |
 
-Di luar siklus: **Padel** (auto-log sebagai leg + cardio) dan **Rest/Swim day**. Dua-duanya dihitung sebagai
-"hari aktif" buat streak & kalender, tapi **tidak menggeser posisi siklus 4 hari**.
+Di luar siklus: **Padel** (auto-log sebagai leg + cardio), **Rest/Swim day**, dan **Aktivitas lain** (custom —
+nama diisi sendiri, plus durasi & intensitas). Ketiganya dihitung sebagai "hari aktif" buat streak & kalender,
+tapi **tidak menggeser posisi siklus 4 hari**.
 
 ## Fitur
 
@@ -92,11 +93,15 @@ tidak log lama akan terputus dari gerakannya.
 
 ## Gambar gerakan
 
-Urutan pencarian: **wger API v2** (gratis, tanpa key) → **ExerciseDB** (base URL & RapidAPI key opsional,
-diatur di tab Profile) → **placeholder inisial + ikon**. Semua kegagalan (offline, CORS, rate limit, JSON
-tak dikenal) ditangani diam-diam; app tidak pernah crash karena gambar. Hasil lookup di-cache 30 hari di
-localStorage dan bisa dibersihkan dari Settings.
+Semua gerakan di program ini gambarnya **ikut di-bundle** di `src/assets/exercises/<slug>/{0,1}.webp` —
+dua frame (posisi awal & akhir) yang dianimasikan bergantian tiap 900 ms, jadi kelihatan seperti GIF tanpa
+file GIF. Sumbernya [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (lisensi Unlicense /
+public domain), sudah di-resize ke 440 px dan dikompres ke WebP: 52 frame, total ~690 KB. Karena lokal,
+gambar muncul instan, jalan offline, dan tidak kena CORS atau rate limit.
 
-Catatan: wger menyajikan gambar statis, bukan GIF animasi. Kalau mau GIF animasi beneran, isi endpoint
-ExerciseDB di Settings — parser-nya sengaja toleran dan menerima field `gifUrl` / `image` dari bentuk
-respons apa pun.
+Untuk gerakan yang belum punya gambar bundel, urutan fallback-nya: **wger API v2** (gratis, tanpa key) →
+**ExerciseDB** (base URL & RapidAPI key opsional, diatur di tab Profile) → **placeholder inisial + ikon**.
+Semua kegagalan ditangani diam-diam; app tidak pernah crash karena gambar.
+
+Mau nambah gerakan baru? Taruh dua frame di `src/assets/exercises/<istilah-search-dengan-tanda-hubung>/`
+dan `data/exerciseImages.js` bakal otomatis nemuin lewat `import.meta.glob` — tidak perlu daftar manual.

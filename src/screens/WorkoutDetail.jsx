@@ -7,7 +7,7 @@ import { fmtDuration, todayKey } from '../lib/date.js';
 import { Button, Card, Chip, ProgressRing, StatCard, StatRow, Segmented, Switch, Sheet, cx } from '../components/ui/Primitives.jsx';
 import {
   IconChevronLeft, IconPlay, IconPause, IconCheck, IconHome, IconDumbbell, IconSteam,
-  IconWarn, IconLayers, IconTimer, IconFlame, IconRacket, IconWaves, DAY_ICONS,
+  IconWarn, IconLayers, IconTimer, IconFlame, IconRacket, IconWaves, DAY_ICONS, SPECIAL_TONE,
 } from '../components/ui/Icons.jsx';
 import ExerciseCard from '../components/ExerciseCard.jsx';
 import OverloadCard from '../components/OverloadCard.jsx';
@@ -51,12 +51,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
       <div className="anim-screen space-y-5">
         <DetailHeader day={day} onBack={onBack} pos={null} />
         <Card className="p-5 text-center">
-          <span
-            className={cx(
-              'w-16 h-16 mx-auto grid place-items-center rounded-3xl mb-3',
-              dayId === 'padel' ? 'bg-amber-400/15 text-amber-300' : 'bg-sky-400/15 text-sky-300'
-            )}
-          >
+          <span className={cx('w-16 h-16 mx-auto grid place-items-center rounded-3xl mb-3', SPECIAL_TONE[dayId])}>
             <Icon size={30} />
           </span>
           <p className="text-[17px] font-extrabold">{day.blurb}</p>
@@ -66,7 +61,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
           </Button>
           {doneToday && (
             <p className="text-[12px] text-lime-accent mt-3 font-semibold">
-              Sudah tercatat hari ini
+              {doneToday.meta?.name ? `"${doneToday.meta.name}" tercatat hari ini` : 'Sudah tercatat hari ini'}
               {doneToday.meta?.durationMin ? ` · ${doneToday.meta.durationMin} menit` : ''}
               {doneToday.meta?.intensity ? ` · ${doneToday.meta.intensity}` : ''}
             </p>

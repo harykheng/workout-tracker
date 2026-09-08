@@ -242,6 +242,13 @@ export const IconImage = (p) => (
   </Svg>
 );
 
+export const IconSpark = (p) => (
+  <Svg {...p}>
+    <path d="M12 3.5 13.9 9l5.6 1.9-5.6 1.9L12 18.5 10.1 12.8 4.5 10.9 10.1 9z" />
+    <path d="M18.5 3.5v3M20 5h-3" opacity=".6" />
+  </Svg>
+);
+
 export const DAY_ICONS = {
   d1: IconDumbbell,
   d2: IconLayers,
@@ -249,4 +256,12 @@ export const DAY_ICONS = {
   d4: IconFlame,
   padel: IconRacket,
   swim: IconWaves,
+  custom: IconSpark,
+};
+
+/** Warna per jenis hari non-siklus. */
+export const SPECIAL_TONE = {
+  padel: 'bg-amber-400/15 text-amber-300',
+  swim: 'bg-sky-400/15 text-sky-300',
+  custom: 'bg-violet-400/15 text-violet-300',
 };

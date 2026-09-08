@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../hooks/useStore.jsx';
+import { sessionTitle } from '../data/schedule.js';
 import { weightStats, computeStreak, buildExerciseLog, weekSummary } from '../lib/stats.js';
 import { todayKey, formatFull, relativeLabel, diffDays, fmtDurationShort } from '../lib/date.js';
 import { WeightChart, Sparkline } from '../components/Charts.jsx';
@@ -178,7 +179,7 @@ export default function Progress() {
               <div className="space-y-2">
                 {dayDetail.list.map((s) => (
                   <Card key={s.id} className="p-3">
-                    <p className="text-[14px] font-bold">{s.dayId === 'padel' ? 'Padel' : s.dayId === 'swim' ? 'Swim / rest' : `Hari ${s.dayId.replace('d', '')}`}</p>
+                    <p className="text-[14px] font-bold">{sessionTitle(s)}</p>
                     <p className="text-[12px] text-muted mt-1">
                       {s.durationSec ? `${fmtDurationShort(s.durationSec)} · ` : ''}
                       {s.special ? s.meta?.intensity || 'aktif' : `${Object.values(s.entries || {}).flatMap((e) => e.sets || []).filter((x) => x.done).length} set`}

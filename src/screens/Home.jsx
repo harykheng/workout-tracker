@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react';
-import { CYCLE_DAYS, SPECIAL_DAYS, getDay, resolveExercises, requiredSetCount } from '../data/schedule.js';
+import { useEffect, useMemo, useState } from 'react';
+import { CYCLE_DAYS, SPECIAL_DAYS, getDay, resolveExercises, requiredSetCount, sessionTitle } from '../data/schedule.js';
 import { useStore } from '../hooks/useStore.jsx';
 import { resolveTodayDayId, cyclePosition, computeStreak, weekSummary, weightStats, sessionProgress, sessionSetStats } from '../lib/stats.js';
 import { todayKey, formatLong, fmtDurationShort, fmtDuration, diffDays } from '../lib/date.js';
 import { Button, Card, Chip, ProgressRing, StatCard, StatRow, Segmented, Sheet, SectionTitle, cx } from '../components/ui/Primitives.jsx';
 import {
   IconArrowRight, IconFlame, IconTimer, IconLayers, IconRacket, IconWaves, IconCheck,
-  IconRefresh, IconScale, IconSteam, IconWarn, DAY_ICONS, IconHome, IconDumbbell,
+  IconRefresh, IconScale, IconSteam, IconWarn, DAY_ICONS, IconHome, IconDumbbell, SPECIAL_TONE,
 } from '../components/ui/Icons.jsx';
 import ExerciseMedia from '../components/ExerciseMedia.jsx';
 
@@ -230,11 +230,9 @@ export default function Home({ onOpenDay, onGoTab }) {
                     <Icon size={18} />
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block text-[13.5px] font-bold truncate">
-                      {d?.special ? d.title : `Hari ${d?.num} — ${d?.title || s.dayId}`}
-                    </span>
+                    <span className="block text-[13.5px] font-bold truncate">{sessionTitle(s)}</span>
                     <span className="block text-[11.5px] text-muted tabular">
-                      {s.durationSec ? `${fmtDuration(s.durationSec)} · ` : ''}
+                      {s.durationSec ? `${s.special ? fmtDurationShort(s.durationSec) : fmtDuration(s.durationSec)} · ` : ''}
                       {s.special ? s.meta?.intensity || 'aktif' : `${st.done} set${st.volume ? ` · ${st.volume} kg volume` : ''}`}
                     </span>
                   </span>
@@ -249,7 +247,7 @@ export default function Home({ onOpenDay, onGoTab }) {
       {/* --------------------------------------------- hari di luar siklus */}
       <section>
         <SectionTitle>Di luar siklus</SectionTitle>
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-3 gap-2.5">
           {SPECIAL_DAYS.map((sp) => {
             const Icon = DAY_ICONS[sp.id];
             const loggedToday = todaySessions.some((s) => s.dayId === sp.id);
@@ -263,17 +261,12 @@ export default function Home({ onOpenDay, onGoTab }) {
                   loggedToday ? 'bg-lime-accent/10 border-lime-accent/30' : 'bg-ink-800 border-white/5 hover:bg-ink-750'
                 )}
               >
-                <span
-                  className={cx(
-                    'w-9 h-9 grid place-items-center rounded-xl mb-2',
-                    sp.id === 'padel' ? 'bg-amber-400/15 text-amber-300' : 'bg-sky-400/15 text-sky-300'
-                  )}
-                >
+                <span className={cx('w-9 h-9 grid place-items-center rounded-xl mb-2', SPECIAL_TONE[sp.id])}>
                   <Icon size={18} />
                 </span>
-                <span className="block text-[13.5px] font-bold">{sp.title}</span>
-                <span className="block text-[11.5px] text-muted leading-snug mt-0.5">{sp.blurb}</span>
-                {loggedToday && <Chip tone="lime" className="mt-2">tercatat hari ini</Chip>}
+                <span className="block text-[13px] font-bold leading-tight">{sp.title}</span>
+                <span className="block text-[11px] text-muted leading-snug mt-1">{sp.short || sp.blurb}</span>
+                {loggedToday && <Chip tone="lime" className="mt-2">tercatat</Chip>}
               </button>
             );
           })}
@@ -371,27 +364,31 @@ export function DayPicker({ open, onClose, currentId, onPick, onAuto }) {
 }
 
 export function SpecialLogSheet({ day, onClose, onSave }) {
+  const { state } = useStore();
   const [values, setValues] = useState({});
+  useEffect(() => {
+    setValues({});
+  }, [day?.id]);
   if (!day) return null;
   const Icon = DAY_ICONS[day.id];
+  const invalid = day.fields.some((f) => f.required && !String(values[f.key] || '').trim());
+  // nama aktivitas custom yang pernah dipakai — buat pilih ulang cepat
+  const recentNames = day.custom
+    ? [...new Set(state.sessions.filter((s) => s.dayId === 'custom' && s.meta?.name).map((s) => s.meta.name.trim()))].slice(0, 6)
+    : [];
   return (
     <Sheet
       open={!!day}
       onClose={onClose}
       title={day.title}
       footer={
-        <Button className="w-full" size="lg" onClick={() => onSave(values)}>
+        <Button className="w-full" size="lg" disabled={invalid} onClick={() => onSave(values)}>
           <IconCheck size={16} /> Catat sebagai hari aktif
         </Button>
       }
     >
       <div className="flex items-center gap-3 mb-4">
-        <span
-          className={cx(
-            'w-12 h-12 grid place-items-center rounded-2xl',
-            day.id === 'padel' ? 'bg-amber-400/15 text-amber-300' : 'bg-sky-400/15 text-sky-300'
-          )}
-        >
+        <span className={cx('w-12 h-12 grid place-items-center rounded-2xl', SPECIAL_TONE[day.id])}>
           <Icon size={22} />
         </span>
         <p className="text-[12.5px] text-muted leading-relaxed flex-1">{day.detail}</p>
@@ -413,6 +410,14 @@ export function SpecialLogSheet({ day, onClose, onSave }) {
                   </option>
                 ))}
               </select>
+            ) : f.type === 'text' ? (
+              <input
+                type="text"
+                placeholder={f.placeholder}
+                value={values[f.key] || ''}
+                onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-lime-accent/60 transition"
+              />
             ) : (
               <div className="relative">
                 <input
@@ -429,6 +434,24 @@ export function SpecialLogSheet({ day, onClose, onSave }) {
           </label>
         ))}
       </div>
+
+      {recentNames.length > 0 && (
+        <div className="mt-4">
+          <p className="text-[11px] uppercase tracking-wider text-muted mb-2 font-semibold">Pernah dicatat</p>
+          <div className="flex flex-wrap gap-1.5">
+            {recentNames.map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setValues((v) => ({ ...v, name: n }))}
+                className="px-3 py-1.5 rounded-full bg-white/6 text-[12px] font-semibold text-muted hover:text-white hover:bg-white/12 transition"
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </Sheet>
   );
 }

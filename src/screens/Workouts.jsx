@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
-import { CYCLE_DAYS, SPECIAL_DAYS, getDay, resolveExercises, requiredSetCount } from '../data/schedule.js';
+import { CYCLE_DAYS, SPECIAL_DAYS, getDay, resolveExercises, requiredSetCount, sessionTitle } from '../data/schedule.js';
 import { useStore } from '../hooks/useStore.jsx';
 import { resolveTodayDayId, sessionSetStats } from '../lib/stats.js';
-import { relativeLabel, fmtDuration, todayKey } from '../lib/date.js';
+import { relativeLabel, fmtDuration, fmtDurationShort, todayKey } from '../lib/date.js';
 import { Card, Chip, SectionTitle, Button, cx, EmptyState } from '../components/ui/Primitives.jsx';
-import { DAY_ICONS, IconChevronRight, IconCheck, IconTimer, IconLayers, IconTrash, IconCalendar } from '../components/ui/Icons.jsx';
+import { DAY_ICONS, SPECIAL_TONE, IconChevronRight, IconCheck, IconTimer, IconLayers, IconTrash, IconCalendar } from '../components/ui/Icons.jsx';
 
 export default function Workouts({ onOpenDay }) {
   const { state, actions } = useStore();
@@ -99,12 +99,7 @@ export default function Workouts({ onOpenDay }) {
                     onClick={() => onOpenDay(day.id)}
                     className="w-full flex items-center gap-3 rounded-3xl bg-ink-800 border border-white/5 p-3.5 text-left hover:bg-ink-750 transition active:scale-[0.99]"
                   >
-                    <span
-                      className={cx(
-                        'w-12 h-12 shrink-0 grid place-items-center rounded-2xl',
-                        day.id === 'padel' ? 'bg-amber-400/15 text-amber-300' : 'bg-sky-400/15 text-sky-300'
-                      )}
-                    >
+                    <span className={cx('w-12 h-12 shrink-0 grid place-items-center rounded-2xl', SPECIAL_TONE[day.id])}>
                       <Icon size={22} />
                     </span>
                     <span className="flex-1 min-w-0">
@@ -150,24 +145,18 @@ function SessionRow({ session, onDelete }) {
       <span
         className={cx(
           'w-11 h-11 shrink-0 grid place-items-center rounded-2xl',
-          session.special
-            ? session.dayId === 'padel'
-              ? 'bg-amber-400/15 text-amber-300'
-              : 'bg-sky-400/15 text-sky-300'
-            : 'bg-lime-accent/15 text-lime-accent'
+          session.special ? SPECIAL_TONE[session.dayId] : 'bg-lime-accent/15 text-lime-accent'
         )}
       >
         <Icon size={20} />
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-[13.5px] font-bold truncate">
-          {day?.special ? day.title : `Hari ${day?.num} — ${day?.title || session.dayId}`}
-        </p>
+        <p className="text-[13.5px] font-bold truncate">{sessionTitle(session)}</p>
         <p className="text-[11.5px] text-muted flex items-center gap-2 flex-wrap mt-0.5">
           <span>{isToday ? 'Hari ini' : relativeLabel(session.date)}</span>
           {session.durationSec > 0 && (
             <span className="inline-flex items-center gap-1 tabular">
-              <IconTimer size={11} /> {fmtDuration(session.durationSec)}
+              <IconTimer size={11} /> {session.special ? fmtDurationShort(session.durationSec) : fmtDuration(session.durationSec)}
             </span>
           )}
           {!session.special && (
