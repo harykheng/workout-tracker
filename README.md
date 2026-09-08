@@ -38,9 +38,39 @@ tapi **tidak menggeser posisi siklus 4 hari**.
   getar (Vibration API) saat habis.
 - **Progress log** per gerakan: tabel tanggal, top set, volume, plus sparkline.
 - **Weight tracker** dengan line chart menuju target 90-95 kg; target & deadline bisa diedit di Settings.
+- **Kalori & hitungan defisit** — tiap sesi dapat estimasi kalori otomatis (rumus MET) yang bisa ditimpa
+  manual, lalu diringkas jadi rencana defisit harian di tab Progress.
 - **Streak & kalender bulanan** — hari aktif ditandai per jenis (workout / padel / swim), hari bolong tetap
   kelihatan.
 - **Export / import JSON** buat backup.
+
+## Kalori & defisit
+
+Estimasi kalori pakai rumus MET dari Compendium of Physical Activities:
+
+```
+kcal = MET × 3.5 × beratBadanKg / 200 × menit
+```
+
+MET yang dipakai: latihan beban 5,0 (versi rumah, rep tinggi + rest pendek) / 4,5 (versi gym); padel 5-8 dan
+renang 6-8,3 tergantung intensitas; aktivitas custom 4-8. Angka otomatis ini bisa **ditimpa manual** di sheet
+"Selesaikan sesi" atau saat mencatat hari non-siklus — isi angka dari jam tangan / heart rate monitor kalau
+punya, karena itu lebih akurat.
+
+Panel **Hitungan defisit** di tab Progress memakai patokan 1 kg lemak ≈ 7.700 kcal:
+
+- defisit total yang dibutuhkan = sisa kg × 7.700, dibagi jumlah hari tersisa
+- rata-rata pembakaran workout 14 hari terakhir
+- sisanya yang harus datang dari makan
+- target asupan harian = BMR (Mifflin-St Jeor) × faktor aktivitas harian + pembakaran workout − defisit
+  (muncul kalau umur sudah diisi di tab Profile)
+
+Ada dua rambu: kalau target asupan jatuh di bawah 1.500 kcal (pria) / 1.200 kcal (wanita), atau kalau laju
+yang dibutuhkan lebih dari 1,1% berat badan per minggu, app kasih peringatan buat mundurin deadline —
+bukannya diam-diam menampilkan angka yang tidak sehat.
+
+Semua angka pembakaran ini estimasi, bukan pengukuran; meleset 20-30% itu normal. Timbangan tetap umpan
+balik yang menentukan.
 
 ## Tipografi
 

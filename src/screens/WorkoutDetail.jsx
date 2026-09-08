@@ -2,12 +2,13 @@ import { useMemo, useState } from 'react';
 import { getDay, resolveExercises, CORE_FINISHER } from '../data/schedule.js';
 import { useStore, useElapsed } from '../hooks/useStore.jsx';
 import { useRestTimer } from '../hooks/useRestTimer.jsx';
-import { sessionProgress, sessionSetStats, cyclePosition } from '../lib/stats.js';
+import { sessionProgress, sessionSetStats, cyclePosition, weightStats } from '../lib/stats.js';
+import { sessionKcal, metFor } from '../lib/energy.js';
 import { fmtDuration, todayKey } from '../lib/date.js';
 import { Button, Card, Chip, ProgressRing, StatCard, StatRow, Segmented, Switch, Sheet, cx } from '../components/ui/Primitives.jsx';
 import {
   IconChevronLeft, IconPlay, IconPause, IconCheck, IconHome, IconDumbbell, IconSteam,
-  IconWarn, IconLayers, IconTimer, IconFlame, IconRacket, IconWaves, DAY_ICONS, SPECIAL_TONE,
+  IconWarn, IconLayers, IconTimer, IconFlame, IconFire, IconRacket, IconWaves, DAY_ICONS, SPECIAL_TONE,
 } from '../components/ui/Icons.jsx';
 import ExerciseCard from '../components/ExerciseCard.jsx';
 import ExerciseMedia from '../components/ExerciseMedia.jsx';
@@ -20,6 +21,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
   const rest = useRestTimer();
   const [confirmFinish, setConfirmFinish] = useState(false);
   const [zoomEx, setZoomEx] = useState(null);
+  const [kcalEdit, setKcalEdit] = useState('');
   const [specialSheet, setSpecialSheet] = useState(null);
 
   const day = getDay(dayId);
@@ -47,6 +49,10 @@ export default function WorkoutDetail({ dayId, onBack }) {
   const pos = cyclePosition(dayId);
   const progress = session ? sessionProgress(session, day) : { pct: 0, done: 0, total: 0 };
   const stats = session ? sessionSetStats(session) : { done: 0, total: 0, volume: 0 };
+  const bodyWeight = weightStats(state).current;
+  const liveKcal = active
+    ? sessionKcal({ ...active, durationSec: elapsed, kcal: kcalEdit || active.kcal }, bodyWeight)
+    : sessionKcal(doneToday, bodyWeight);
 
   /* ------------------------------------------------------- hari non-siklus */
   if (day.special) {
@@ -135,7 +141,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
         <StatRow>
           <StatCard icon={IconLayers} value={`${stats.done}`} label="Set selesai" accent />
           <StatCard icon={IconFlame} value={stats.volume ? `${stats.volume}` : '—'} label="Volume (kg)" />
-          <StatCard icon={IconTimer} value={`${exercises.length}`} label="Gerakan" />
+          <StatCard icon={IconFire} value={liveKcal ? `${liveKcal}` : '—'} label="Kalori (est)" />
         </StatRow>
       )}
 
@@ -246,6 +252,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
             <Button
               className="flex-1"
               onClick={() => {
+                if (kcalEdit) actions.updateActive(() => ({ kcal: Math.round(Number(kcalEdit)) || null }));
                 actions.finishSession();
                 rest.stop();
                 setConfirmFinish(false);
@@ -272,6 +279,32 @@ export default function WorkoutDetail({ dayId, onBack }) {
             <StatCard icon={IconLayers} value={stats.done} label="Set" />
             <StatCard icon={IconFlame} value={stats.volume || '—'} label="Volume kg" />
           </StatRow>
+
+          <div className="rounded-2xl bg-ink-900/60 p-3.5 mt-1">
+            <label className="block">
+              <span className="flex items-center justify-between mb-2">
+                <span className="text-[11px] uppercase tracking-wider text-muted font-semibold">Kalori terbakar</span>
+                <span className="text-[11px] text-muted">
+                  estimasi {sessionKcal({ ...active, durationSec: elapsed, kcal: null }, bodyWeight)} kcal
+                </span>
+              </span>
+              <div className="relative">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder={String(sessionKcal({ ...active, durationSec: elapsed, kcal: null }, bodyWeight))}
+                  value={kcalEdit}
+                  onChange={(e) => setKcalEdit(e.target.value)}
+                  className="w-full bg-ink-900 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm tabular outline-none focus:border-lime-accent/60 transition"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-muted">kcal</span>
+              </div>
+            </label>
+            <p className="text-[11.5px] text-muted leading-relaxed mt-2">
+              Dihitung dari MET {metFor(active)} × {bodyWeight} kg × durasi. Isi manual kalau kamu punya angka dari
+              jam tangan / heart rate monitor — itu lebih akurat.
+            </p>
+          </div>
         </div>
       </Sheet>
     </div>

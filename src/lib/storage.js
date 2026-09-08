@@ -15,6 +15,7 @@
  * Session {
  *   id, date, dayId, mode, special, startedAt, endedAt, durationSec, completed,
  *   includeCore, skipLegSprinkle, padelRecent, notes,
+ *   kcal: number|null,               // override manual; kosong = dihitung dari MET
  *   entries: { [exerciseId]: { sets: [{ reps, weight, done }] } },
  *   meta: { durationMin, intensity }   // khusus padel / swim
  * }
@@ -32,6 +33,9 @@ export const DEFAULT_STATE = {
     targetMinKg: 90,
     targetMaxKg: 95,
     targetDate: '2026-10-24',
+    age: null,
+    sex: 'male',
+    activityFactor: 1.35,
   },
   settings: {
     defaultRestSec: 60,
@@ -77,6 +81,13 @@ export function normalize(raw) {
       : [],
     media: isObj(src.media) ? src.media : {},
   };
+  // umur opsional: null kalau kosong / tidak masuk akal
+  const age = Number(state.profile.age);
+  state.profile.age = Number.isFinite(age) && age > 0 && age < 120 ? Math.round(age) : null;
+  if (state.profile.sex !== 'female') state.profile.sex = 'male';
+  const factor = Number(state.profile.activityFactor);
+  state.profile.activityFactor = Number.isFinite(factor) && factor >= 1 && factor <= 2 ? factor : 1.35;
+
   // angka profil harus numerik
   for (const k of ['heightCm', 'startWeightKg', 'targetMinKg', 'targetMaxKg']) {
     const n = Number(state.profile[k]);

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { CYCLE_DAYS, SPECIAL_DAYS, getDay, resolveExercises, requiredSetCount, sessionTitle } from '../data/schedule.js';
 import { useStore } from '../hooks/useStore.jsx';
-import { resolveTodayDayId, sessionSetStats } from '../lib/stats.js';
+import { resolveTodayDayId, sessionSetStats, weightStats } from '../lib/stats.js';
+import { sessionKcal } from '../lib/energy.js';
 import { relativeLabel, fmtDuration, fmtDurationShort, todayKey } from '../lib/date.js';
 import { Card, Chip, SectionTitle, Button, cx, EmptyState } from '../components/ui/Primitives.jsx';
-import { DAY_ICONS, SPECIAL_TONE, IconChevronRight, IconCheck, IconTimer, IconLayers, IconTrash, IconCalendar } from '../components/ui/Icons.jsx';
+import { DAY_ICONS, SPECIAL_TONE, IconChevronRight, IconCheck, IconTimer, IconLayers, IconTrash, IconCalendar, IconFire } from '../components/ui/Icons.jsx';
 
 export default function Workouts({ onOpenDay }) {
   const { state, actions } = useStore();
@@ -134,7 +135,9 @@ export default function Workouts({ onOpenDay }) {
 }
 
 function SessionRow({ session, onDelete }) {
+  const { state } = useStore();
   const [confirm, setConfirm] = useState(false);
+  const kcal = sessionKcal(session, weightStats(state).current);
   const day = getDay(session.dayId);
   const Icon = DAY_ICONS[session.dayId] || IconLayers;
   const stats = sessionSetStats(session);
@@ -162,6 +165,11 @@ function SessionRow({ session, onDelete }) {
           {!session.special && (
             <span className="inline-flex items-center gap-1 tabular">
               <IconLayers size={11} /> {stats.done} set
+            </span>
+          )}
+          {kcal > 0 && (
+            <span className="inline-flex items-center gap-1 tabular">
+              <IconFire size={11} /> {kcal} kcal
             </span>
           )}
           {session.mode === 'gym' && !session.special && <Chip tone="lime">gym</Chip>}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../hooks/useStore.jsx';
 import { sessionTitle } from '../data/schedule.js';
+import { energyPlan, sessionKcal, kcalToKg, KCAL_PER_KG_FAT } from '../lib/energy.js';
 import { weightStats, computeStreak, buildExerciseLog, weekSummary } from '../lib/stats.js';
 import { todayKey, formatFull, relativeLabel, diffDays, fmtDurationShort } from '../lib/date.js';
 import { WeightChart, Sparkline } from '../components/Charts.jsx';
@@ -9,7 +10,7 @@ import {
   Button, Card, Chip, ProgressRing, SectionTitle, StatCard, StatRow, Sheet, Input, Field, cx, EmptyState,
 } from '../components/ui/Primitives.jsx';
 import {
-  IconScale, IconFlame, IconTarget, IconChevronDown, IconPlus, IconTrash, IconChart, IconLayers, IconTimer,
+  IconScale, IconFlame, IconTarget, IconChevronDown, IconPlus, IconTrash, IconChart, IconLayers, IconTimer, IconFire,
 } from '../components/ui/Icons.jsx';
 
 export default function Progress() {
@@ -22,6 +23,17 @@ export default function Progress() {
   const streak = useMemo(() => computeStreak(state.sessions), [state.sessions]);
   const week = useMemo(() => weekSummary(state.sessions), [state.sessions]);
   const exLog = useMemo(() => buildExerciseLog(state.sessions), [state.sessions]);
+  const energy = useMemo(
+    () =>
+      energyPlan({
+        sessions: state.sessions,
+        profile: state.profile,
+        currentWeight: w.current,
+        daysLeft: w.daysLeft,
+        remainingKg: w.remaining,
+      }),
+    [state.sessions, state.profile, w.current, w.daysLeft, w.remaining]
+  );
 
   return (
     <div className="anim-screen space-y-5">
@@ -104,6 +116,8 @@ export default function Progress() {
             </Card>
           )}
 
+          <EnergyPanel energy={energy} />
+
           <Button className="w-full" size="lg" onClick={() => setAddOpen(true)}>
             <IconPlus size={16} /> Catat berat badan
           </Button>
@@ -184,6 +198,7 @@ export default function Progress() {
                       {s.durationSec ? `${fmtDurationShort(s.durationSec)} · ` : ''}
                       {s.special ? s.meta?.intensity || 'aktif' : `${Object.values(s.entries || {}).flatMap((e) => e.sets || []).filter((x) => x.done).length} set`}
                       {s.mode === 'gym' && !s.special ? ' · versi gym' : ''}
+                      {sessionKcal(s, w.current) ? ` · ${sessionKcal(s, w.current)} kcal` : ''}
                     </p>
                   </Card>
                 ))}
@@ -224,6 +239,85 @@ export default function Progress() {
         }}
       />
     </div>
+  );
+}
+
+function EnergyPanel({ energy }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Card className="overflow-hidden">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="w-full flex items-center gap-3 p-4 text-left">
+        <span className="w-10 h-10 shrink-0 grid place-items-center rounded-2xl bg-lime-accent/15 text-lime-accent">
+          <IconFire size={19} />
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-[14px] font-bold">Hitungan defisit</span>
+          <span className="block text-[11.5px] text-muted mt-0.5 tabular">
+            Butuh {energy.perDayDeficit} kcal/hari · workout nyumbang {energy.burnPerDay}
+          </span>
+        </span>
+        <IconChevronDown size={18} className={cx('text-muted transition-transform duration-300', open && 'rotate-180')} />
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 anim-fade space-y-3">
+          <div className="rounded-2xl bg-ink-900/60 p-3.5 space-y-2.5">
+            <Row label={`Turun ${energy.kgToLose} kg dalam ${energy.daysLeft} hari`} value={`${energy.totalDeficit.toLocaleString('id')} kcal`} />
+            <Row label="Defisit yang dibutuhkan" value={`${energy.perDayDeficit} kcal/hari`} accent />
+            <div className="h-px bg-white/5" />
+            <Row label={`Dibakar workout (rata² ${energy.sample.days} hari)`} value={`${energy.burnPerDay} kcal/hari`} />
+            <Row label="Sisanya harus dari makan" value={`${energy.fromFoodPerDay} kcal/hari`} accent />
+          </div>
+
+          {energy.warning && (
+            <div
+              className={cx(
+                'rounded-2xl p-3.5 border',
+                energy.warning.level === 'danger'
+                  ? 'bg-red-500/10 border-red-400/30'
+                  : 'bg-amber-400/8 border-amber-400/20'
+              )}
+            >
+              <p
+                className={cx(
+                  'text-[12.5px] leading-relaxed',
+                  energy.warning.level === 'danger' ? 'text-red-200' : 'text-amber-100/90'
+                )}
+              >
+                {energy.warning.text}
+              </p>
+            </div>
+          )}
+
+          {energy.targetIntake && energy.warning?.level !== 'danger' ? (
+            <div className="rounded-2xl bg-lime-accent/[0.07] border border-lime-accent/25 p-3.5">
+              <p className="text-[11px] uppercase tracking-wider text-lime-accent font-bold mb-2">Target asupan harian</p>
+              <p className="display-num text-[30px] text-lime-accent">
+                {energy.targetIntake.toLocaleString('id')} <span className="font-sans text-[13px] font-bold">kcal</span>
+              </p>
+              <p className="text-[11.5px] text-muted leading-relaxed mt-2">
+                Dari BMR {energy.bmr} kcal × aktivitas harian = {energy.tdeeBase} kcal, ditambah rata-rata pembakaran
+                workout {energy.burnPerDay} kcal, dikurangi defisit {energy.perDayDeficit} kcal.
+              </p>
+            </div>
+          ) : energy.targetIntake ? null : (
+            <div className="rounded-2xl bg-white/[0.04] border border-white/8 p-3.5">
+              <p className="text-[12.5px] text-muted leading-relaxed">
+                Isi umur di tab Profile buat dapat angka target asupan harian (butuh umur, tinggi, dan berat badan
+                untuk hitung BMR).
+              </p>
+            </div>
+          )}
+
+          <p className="text-[11.5px] text-muted leading-relaxed">
+            Patokan: 1 kg lemak ≈ {KCAL_PER_KG_FAT.toLocaleString('id')} kcal. Semua angka pembakaran di sini estimasi
+            dari rumus MET, bukan pengukuran — meleset 20-30% itu normal. Yang menentukan tetap defisit total, dan
+            timbangan adalah umpan balik yang sebenarnya: kalau berat gak turun padahal angka di sini bilang defisit,
+            berarti asupannya yang perlu dikoreksi, bukan workout-nya yang ditambah.
+          </p>
+        </div>
+      )}
+    </Card>
   );
 }
 

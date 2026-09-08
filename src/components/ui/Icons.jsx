@@ -242,6 +242,13 @@ export const IconImage = (p) => (
   </Svg>
 );
 
+export const IconFire = (p) => (
+  <Svg {...p}>
+    <path d="M12 2.8c.4 2.6-.9 4-2.1 5.2C8.4 9.4 7 10.8 7 13.4a5 5 0 0 0 10 0c0-2-.8-3.5-1.8-4.7-.5 1-1.2 1.6-2 1.9.6-2.6-.3-5.6-1.2-7.8z" />
+    <path d="M12 14.2c.9.5 1.4 1.3 1.4 2.2a2 2 0 0 1-2.8 1.8" opacity=".55" />
+  </Svg>
+);
+
 export const IconExpand = (p) => (
   <Svg strokeWidth={2} {...p}>
     <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" />

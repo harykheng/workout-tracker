@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { CYCLE_DAYS, SPECIAL_DAYS, getDay, resolveExercises, requiredSetCount, sessionTitle } from '../data/schedule.js';
 import { useStore } from '../hooks/useStore.jsx';
 import { resolveTodayDayId, cyclePosition, computeStreak, weekSummary, weightStats, sessionProgress, sessionSetStats } from '../lib/stats.js';
-import { todayKey, formatLong, fmtDurationShort, fmtDuration, diffDays } from '../lib/date.js';
+import { sessionKcal, estimateKcal } from '../lib/energy.js';
+import { todayKey, formatLong, fmtDurationShort, fmtDuration, diffDays, addDays } from '../lib/date.js';
 import { Button, Card, Chip, ProgressRing, StatCard, StatRow, Segmented, Sheet, SectionTitle, cx } from '../components/ui/Primitives.jsx';
 import {
   IconArrowRight, IconFlame, IconTimer, IconLayers, IconRacket, IconWaves, IconCheck,
-  IconRefresh, IconScale, IconSteam, IconWarn, DAY_ICONS, IconHome, IconDumbbell, SPECIAL_TONE,
+  IconRefresh, IconScale, IconSteam, IconWarn, DAY_ICONS, IconHome, IconDumbbell, IconFire, SPECIAL_TONE,
 } from '../components/ui/Icons.jsx';
 import ExerciseMedia from '../components/ExerciseMedia.jsx';
 import ExerciseMediaSheet from '../components/ExerciseMediaSheet.jsx';
@@ -27,6 +28,13 @@ export default function Home({ onOpenDay, onGoTab }) {
   const streak = useMemo(() => computeStreak(state.sessions), [state.sessions]);
   const week = useMemo(() => weekSummary(state.sessions), [state.sessions]);
   const weight = useMemo(() => weightStats(state), [state]);
+  const weekKcal = useMemo(
+    () =>
+      state.sessions
+        .filter((s) => s.completed && s.date > addDays(todayKey(), -7))
+        .reduce((n, s) => n + sessionKcal(s, weight.current), 0),
+    [state.sessions, weight.current]
+  );
 
   const todaySessions = state.sessions.filter((s) => s.date === today && s.completed);
   const activeToday = state.active?.date === today ? state.active : null;
@@ -89,7 +97,7 @@ export default function Home({ onOpenDay, onGoTab }) {
 
       {/* ------------------------------------------------------ stat cards */}
       <StatRow>
-        <StatCard icon={IconLayers} value={week.sets} label="Set / 7 hari" accent />
+        <StatCard icon={IconFire} value={weekKcal ? `${weekKcal}` : '0'} label="Kcal / 7 hari" accent />
         <StatCard icon={IconTimer} value={fmtDurationShort(week.totalSec)} label="Durasi" />
         <StatCard icon={IconFlame} value={`${week.activeDays}/7`} label="Hari aktif" />
       </StatRow>
@@ -240,7 +248,8 @@ export default function Home({ onOpenDay, onGoTab }) {
                     <span className="block text-[13.5px] font-bold truncate">{sessionTitle(s)}</span>
                     <span className="block text-[11.5px] text-muted tabular">
                       {s.durationSec ? `${s.special ? fmtDurationShort(s.durationSec) : fmtDuration(s.durationSec)} · ` : ''}
-                      {s.special ? s.meta?.intensity || 'aktif' : `${st.done} set${st.volume ? ` · ${st.volume} kg volume` : ''}`}
+                      {s.special ? s.meta?.intensity || 'aktif' : `${st.done} set`}
+                      {sessionKcal(s, weight.current) ? ` · ${sessionKcal(s, weight.current)} kcal` : ''}
                     </span>
                   </span>
                   <IconCheck size={18} className="text-lime-accent shrink-0" />
@@ -385,6 +394,14 @@ export function SpecialLogSheet({ day, onClose, onSave }) {
   const recentNames = day.custom
     ? [...new Set(state.sessions.filter((s) => s.dayId === 'custom' && s.meta?.name).map((s) => s.meta.name.trim()))].slice(0, 6)
     : [];
+  const bodyWeight = weightStats(state).current;
+  const autoKcal = estimateKcal({
+    special: true,
+    dayId: day.id,
+    intensity: values.intensity || day.fields.find((f) => f.type === 'select')?.options[0],
+    minutes: Number(values.durationMin) || 0,
+    weightKg: bodyWeight,
+  });
   return (
     <Sheet
       open={!!day}
@@ -443,6 +460,27 @@ export function SpecialLogSheet({ day, onClose, onSave }) {
           </label>
         ))}
       </div>
+
+      <label className="block mt-3.5">
+        <span className="flex items-center justify-between mb-1.5">
+          <span className="text-[11px] uppercase tracking-wider text-muted font-semibold">Kalori terbakar</span>
+          {autoKcal > 0 && <span className="text-[11px] text-muted">estimasi {autoKcal} kcal</span>}
+        </span>
+        <div className="relative">
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder={autoKcal > 0 ? String(autoKcal) : 'isi durasi dulu'}
+            value={values.kcal || ''}
+            onChange={(e) => setValues((v) => ({ ...v, kcal: e.target.value }))}
+            className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm tabular outline-none focus:border-lime-accent/60 transition"
+          />
+          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-muted">kcal</span>
+        </div>
+        <span className="block text-[11.5px] text-muted mt-1.5 leading-relaxed">
+          Kosongkan buat pakai estimasi otomatis (MET × berat badan × durasi).
+        </span>
+      </label>
 
       {recentNames.length > 0 && (
         <div className="mt-4">

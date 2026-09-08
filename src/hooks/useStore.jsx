@@ -72,6 +72,7 @@ export function StoreProvider({ children }) {
             skipLegSprinkle: !!opts.skipLegSprinkle,
             padelRecent: !!opts.padelRecent,
             notes: '',
+            kcal: null,
             meta: {},
             entries: day.special ? {} : blankEntries(day, config),
           };
@@ -196,6 +197,7 @@ export function StoreProvider({ children }) {
       /** Catat cepat hari non-siklus (padel / swim) tanpa buka sesi. */
       logSpecialDay(dayId, meta = {}, date = todayKey()) {
         setState((s) => {
+          const { kcal, ...rest } = meta;
           const session = {
             id: newId(),
             date,
@@ -210,7 +212,8 @@ export function StoreProvider({ children }) {
             skipLegSprinkle: false,
             padelRecent: dayId === 'padel',
             notes: '',
-            meta,
+            kcal: Number(kcal) > 0 ? Math.round(Number(kcal)) : null,
+            meta: rest,
             entries: {},
           };
           return {

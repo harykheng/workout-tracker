@@ -3,9 +3,10 @@ import { useStore } from '../hooks/useStore.jsx';
 import { downloadBackup, parseImport } from '../lib/storage.js';
 import { weightStats, computeStreak } from '../lib/stats.js';
 import { formatFull, todayKey } from '../lib/date.js';
+import { ACTIVITY_LEVELS, bmr } from '../lib/energy.js';
 import { previewBeep } from '../hooks/useRestTimer.jsx';
 import {
-  Button, Card, Field, Input, SectionTitle, Switch, cx, useToast, Sheet, StatCard, StatRow,
+  Button, Card, Field, Input, Select, SectionTitle, Switch, cx, useToast, Sheet, StatCard, StatRow,
 } from '../components/ui/Primitives.jsx';
 import {
   IconUser, IconTarget, IconTimer, IconDownload, IconUpload, IconTrash, IconScale, IconFlame, IconImage, IconInfo,
@@ -21,6 +22,7 @@ export default function Profile() {
   const w = useMemo(() => weightStats(state), [state]);
   const streak = useMemo(() => computeStreak(state.sessions), [state.sessions]);
   const { profile, settings } = state;
+  const restingBmr = bmr({ weightKg: w.current, heightCm: profile.heightCm, age: profile.age, sex: profile.sex });
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
@@ -66,7 +68,22 @@ export default function Profile() {
           <Field label="Nama (buat greeting di home)">
             <Input value={profile.name} onChange={(e) => actions.updateProfile({ name: e.target.value })} placeholder="Hary" />
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2.5">
+            <Field label="Umur">
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder="—"
+                value={profile.age ?? ''}
+                onChange={(e) => actions.updateProfile({ age: e.target.value === '' ? null : Number(e.target.value) })}
+              />
+            </Field>
+            <Field label="Gender">
+              <Select value={profile.sex} onChange={(e) => actions.updateProfile({ sex: e.target.value })}>
+                <option value="male">Pria</option>
+                <option value="female">Wanita</option>
+              </Select>
+            </Field>
             <Field label="Tinggi (cm)">
               <Input
                 type="number"
@@ -75,16 +92,35 @@ export default function Profile() {
                 onChange={(e) => actions.updateProfile({ heightCm: Number(e.target.value) })}
               />
             </Field>
-            <Field label="Berat awal (kg)">
-              <Input
-                type="number"
-                inputMode="decimal"
-                step="0.1"
-                value={profile.startWeightKg}
-                onChange={(e) => actions.updateProfile({ startWeightKg: Number(e.target.value) })}
-              />
-            </Field>
           </div>
+          <Field
+            label="Aktivitas harian di luar workout"
+            hint={
+              restingBmr
+                ? `BMR kamu ≈ ${restingBmr} kcal/hari. Dipakai buat hitung target asupan di tab Progress.`
+                : 'Isi umur dulu biar BMR & target asupan bisa dihitung.'
+            }
+          >
+            <Select
+              value={String(profile.activityFactor)}
+              onChange={(e) => actions.updateProfile({ activityFactor: Number(e.target.value) })}
+            >
+              {ACTIVITY_LEVELS.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label} — {l.hint}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Berat awal (kg)" hint="Titik start buat hitung “sudah turun berapa kg”.">
+            <Input
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={profile.startWeightKg}
+              onChange={(e) => actions.updateProfile({ startWeightKg: Number(e.target.value) })}
+            />
+          </Field>
         </Card>
       </section>
 
