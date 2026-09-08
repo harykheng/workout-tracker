@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { IconX } from './Icons.jsx';
 
 export function cx(...parts) {
@@ -234,8 +235,11 @@ export function Sheet({ open, onClose, title, children, footer }) {
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+  // Di-portal ke <body>: screen wrapper punya animasi (anim-screen) yang bikin
+  // stacking context sendiri, jadi z-index sheet kalah sama bottom nav kalau
+  // dirender in-place.
+  return createPortal(
+    <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm anim-fade" onClick={onClose} />
       <div
         ref={ref}
@@ -257,7 +261,8 @@ export function Sheet({ open, onClose, title, children, footer }) {
         <div className="px-5 py-4">{children}</div>
         {footer && <div className="sticky bottom-0 bg-ink-850/95 backdrop-blur px-5 py-3 border-t border-white/5">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -273,7 +278,8 @@ export function useToast() {
   };
   useEffect(() => () => clearTimeout(timer.current), []);
   const node = toast ? (
-    <div className="fixed left-1/2 -translate-x-1/2 bottom-28 z-[60] anim-pop pointer-events-none">
+    createPortal(
+    <div className="fixed left-1/2 -translate-x-1/2 bottom-28 z-[80] anim-pop pointer-events-none">
       <div
         className={cx(
           'px-4 py-2.5 rounded-2xl text-[13px] font-semibold shadow-xl border',
@@ -284,7 +290,9 @@ export function useToast() {
       >
         {toast.message}
       </div>
-    </div>
+    </div>,
+    document.body
+    )
   ) : null;
   return { show, node };
 }
