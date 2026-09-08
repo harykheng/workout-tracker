@@ -27,12 +27,14 @@ function subscribe(fn) {
   };
 }
 
-function useFrameTick(enabled) {
+function useFrameTick(enabled, ms) {
   const [i, setI] = useState(frameIndex);
   useEffect(() => {
     if (!enabled) return undefined;
-    return subscribe(setI);
-  }, [enabled]);
+    if (!ms) return subscribe(setI); // ikut ticker global biar semua kartu sinkron
+    const id = setInterval(() => setI((v) => (v + 1) % 2), ms);
+    return () => clearInterval(id);
+  }, [enabled, ms]);
   return i;
 }
 
@@ -40,10 +42,18 @@ function useFrameTick(enabled) {
  * Gambar gerakan. Urutan: bundel lokal (2 frame, dianimasikan) -> wger ->
  * ExerciseDB -> placeholder inisial. Tidak pernah melempar error.
  */
-export default function ExerciseMedia({ term, name, size = 56, rounded = 'rounded-2xl', className }) {
+export default function ExerciseMedia({
+  term,
+  name,
+  size = 56,
+  rounded = 'rounded-2xl',
+  className,
+  fill = false,
+  intervalMs,
+}) {
   const { state, actions } = useStore();
   const frames = localFrames(term);
-  const tick = useFrameTick(!!frames && frames.length > 1);
+  const tick = useFrameTick(!!frames && frames.length > 1, intervalMs);
 
   const [media, setMedia] = useState(() => (frames ? null : readCache(state.media, term)));
   const [status, setStatus] = useState(() => (frames || readCache(state.media, term) ? 'done' : 'idle'));
@@ -85,8 +95,13 @@ export default function ExerciseMedia({ term, name, size = 56, rounded = 'rounde
 
   return (
     <div
-      className={cx('relative shrink-0 overflow-hidden bg-white border border-white/6', rounded, className)}
-      style={{ width: size, height: size }}
+      className={cx(
+        'relative overflow-hidden bg-white border border-white/6',
+        fill ? 'w-full aspect-[4/3]' : 'shrink-0',
+        rounded,
+        className
+      )}
+      style={fill ? undefined : { width: size, height: size }}
       title={name}
     >
       {frames ? (
@@ -117,8 +132,10 @@ export default function ExerciseMedia({ term, name, size = 56, rounded = 'rounde
             <span className="w-full h-full animate-pulse bg-white/5" />
           ) : (
             <span className="flex flex-col items-center justify-center text-muted gap-0.5">
-              {size >= 64 ? <IconImage size={18} /> : null}
-              <span className="text-[11px] font-bold tracking-wide text-white/50">{initials}</span>
+              {fill || size >= 64 ? <IconImage size={fill ? 28 : 18} /> : null}
+              <span className={cx('font-bold tracking-wide text-white/50', fill ? 'text-[15px] mt-1' : 'text-[11px]')}>
+                {initials}
+              </span>
             </span>
           )}
         </span>

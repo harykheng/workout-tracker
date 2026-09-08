@@ -10,6 +10,8 @@ import {
   IconWarn, IconLayers, IconTimer, IconFlame, IconRacket, IconWaves, DAY_ICONS, SPECIAL_TONE,
 } from '../components/ui/Icons.jsx';
 import ExerciseCard from '../components/ExerciseCard.jsx';
+import ExerciseMedia from '../components/ExerciseMedia.jsx';
+import ExerciseMediaSheet from '../components/ExerciseMediaSheet.jsx';
 import OverloadCard from '../components/OverloadCard.jsx';
 import { SpecialLogSheet } from './Home.jsx';
 
@@ -17,6 +19,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
   const { state, actions } = useStore();
   const rest = useRestTimer();
   const [confirmFinish, setConfirmFinish] = useState(false);
+  const [zoomEx, setZoomEx] = useState(null);
   const [specialSheet, setSpecialSheet] = useState(null);
 
   const day = getDay(dayId);
@@ -197,7 +200,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
           session ? (
             <ExerciseCard key={ex.id} exercise={ex} session={session} index={i} />
           ) : (
-            <PreviewCard key={ex.id} exercise={ex} index={i} />
+            <PreviewCard key={ex.id} exercise={ex} index={i} onZoom={() => setZoomEx(ex)} />
           )
         )}
       </div>
@@ -228,6 +231,8 @@ export default function WorkoutDetail({ dayId, onBack }) {
           </Button>
         </div>
       )}
+
+      <ExerciseMediaSheet exercise={zoomEx} onClose={() => setZoomEx(null)} />
 
       <Sheet
         open={confirmFinish}
@@ -299,13 +304,19 @@ function DetailHeader({ day, onBack, pos }) {
   );
 }
 
-function PreviewCard({ exercise, index }) {
+function PreviewCard({ exercise, index, onZoom }) {
   return (
-    <Card className="p-3 flex items-center gap-3 opacity-80">
-      <span className="w-9 h-9 grid place-items-center rounded-xl bg-white/5 text-[11px] font-extrabold text-muted tabular">
-        {String(index + 1).padStart(2, '0')}
-      </span>
+    <Card className="p-3 flex items-center gap-3">
+      <button
+        type="button"
+        onClick={onZoom}
+        aria-label={`Lihat gerakan ${exercise.name}`}
+        className="shrink-0 rounded-xl transition-transform duration-200 active:scale-95"
+      >
+        <ExerciseMedia term={exercise.search} name={exercise.name} size={46} rounded="rounded-xl" />
+      </button>
       <span className="flex-1 min-w-0">
+        <span className="block text-[10px] font-bold text-muted tabular">{String(index + 1).padStart(2, '0')}</span>
         <span className="block text-[13.5px] font-bold truncate">{exercise.name}</span>
         <span className="block text-[11.5px] text-muted">
           {exercise.sets} × {exercise.reps} {exercise.unit || ''}

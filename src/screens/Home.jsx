@@ -9,10 +9,12 @@ import {
   IconRefresh, IconScale, IconSteam, IconWarn, DAY_ICONS, IconHome, IconDumbbell, SPECIAL_TONE,
 } from '../components/ui/Icons.jsx';
 import ExerciseMedia from '../components/ExerciseMedia.jsx';
+import ExerciseMediaSheet from '../components/ExerciseMediaSheet.jsx';
 
 export default function Home({ onOpenDay, onGoTab }) {
   const { state, actions } = useStore();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [zoomEx, setZoomEx] = useState(null);
   const [specialSheet, setSpecialSheet] = useState(null);
 
   const today = todayKey();
@@ -181,19 +183,24 @@ export default function Home({ onOpenDay, onGoTab }) {
               const sets = shownSession?.entries?.[ex.id]?.sets || [];
               const done = sets.length >= ex.sets && sets.slice(0, ex.sets).every((s) => s.done);
               return (
-                <button
+                <div
                   key={ex.id}
-                  type="button"
-                  onClick={() => onOpenDay(dayId)}
-                  className="w-full flex items-center gap-3 rounded-2xl bg-ink-800 border border-white/5 p-2.5 text-left hover:bg-ink-750 transition"
+                  className="flex items-center gap-3 rounded-2xl bg-ink-800 border border-white/5 p-2.5 hover:bg-ink-750 transition"
                 >
-                  <ExerciseMedia term={ex.search} name={ex.name} size={46} rounded="rounded-xl" />
-                  <span className="flex-1 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => setZoomEx(ex)}
+                    aria-label={`Lihat gerakan ${ex.name}`}
+                    className="shrink-0 rounded-xl transition-transform duration-200 active:scale-95"
+                  >
+                    <ExerciseMedia term={ex.search} name={ex.name} size={46} rounded="rounded-xl" />
+                  </button>
+                  <button type="button" onClick={() => onOpenDay(dayId)} className="flex-1 min-w-0 text-left">
                     <span className="block text-[13.5px] font-bold truncate">{ex.name}</span>
                     <span className="block text-[11.5px] text-muted">
                       {ex.sets} × {ex.reps} {ex.unit || ''} {ex.isGymAlt ? '· gym' : ''}
                     </span>
-                  </span>
+                  </button>
                   <span
                     className={cx(
                       'w-7 h-7 shrink-0 grid place-items-center rounded-full',
@@ -202,7 +209,7 @@ export default function Home({ onOpenDay, onGoTab }) {
                   >
                     <IconCheck size={14} />
                   </span>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -286,6 +293,8 @@ export default function Home({ onOpenDay, onGoTab }) {
           setPickerOpen(false);
         }}
       />
+
+      <ExerciseMediaSheet exercise={zoomEx} onClose={() => setZoomEx(null)} />
 
       <SpecialLogSheet
         day={specialSheet}

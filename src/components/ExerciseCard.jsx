@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import ExerciseMedia from './ExerciseMedia.jsx';
+import ExerciseMediaSheet from './ExerciseMediaSheet.jsx';
 import { Card, Chip, cx } from './ui/Primitives.jsx';
-import { IconCheck, IconChevronDown, IconPlus, IconTrash, IconInfo, IconTimer } from './ui/Icons.jsx';
+import { IconCheck, IconChevronDown, IconPlus, IconTrash, IconInfo, IconTimer, IconExpand } from './ui/Icons.jsx';
 import { useStore } from '../hooks/useStore.jsx';
 import { useRestTimer } from '../hooks/useRestTimer.jsx';
 import { lastLoggedSets } from '../lib/stats.js';
@@ -11,6 +12,7 @@ export default function ExerciseCard({ exercise, session, index }) {
   const { state, actions } = useStore();
   const rest = useRestTimer();
   const [open, setOpen] = useState(false);
+  const [zoom, setZoom] = useState(false);
 
   const sets = session.entries?.[exercise.id]?.sets || [];
   const doneCount = sets.filter((s) => s.done).length;
@@ -49,7 +51,17 @@ export default function ExerciseCard({ exercise, session, index }) {
       )}
     >
       <div className="flex items-center gap-3 p-3">
-        <ExerciseMedia term={exercise.search} name={exercise.name} size={56} />
+        <button
+          type="button"
+          onClick={() => setZoom(true)}
+          aria-label={`Lihat gerakan ${exercise.name}`}
+          className="relative shrink-0 rounded-2xl transition-transform duration-200 active:scale-95"
+        >
+          <ExerciseMedia term={exercise.search} name={exercise.name} size={56} />
+          <span className="absolute -bottom-1 -right-1 w-5 h-5 grid place-items-center rounded-full bg-ink-800 border border-white/10 text-muted">
+            <IconExpand size={11} />
+          </span>
+        </button>
 
         <button type="button" onClick={() => setOpen((o) => !o)} className="flex-1 min-w-0 text-left">
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -209,6 +221,8 @@ export default function ExerciseCard({ exercise, session, index }) {
           </div>
         </div>
       )}
+
+      <ExerciseMediaSheet exercise={exercise} restSec={restSec} onClose={() => setZoom(false)} open={zoom} />
     </Card>
   );
 }
