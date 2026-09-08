@@ -94,7 +94,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
       <Card className="p-5">
         <div className="flex items-center gap-5">
           <ProgressRing value={progress.pct} size={118} stroke={10}>
-            <span className="display-num text-[34px]">{progress.pct}%</span>
+            <span className="display-num text-[27px]">{progress.pct}%</span>
             <span className="text-[10px] uppercase tracking-wider text-muted mt-1 tabular">
               {progress.done}/{progress.total} set
             </span>
@@ -102,7 +102,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
 
           <div className="flex-1 min-w-0">
             <p className="text-[10.5px] uppercase tracking-wider text-muted font-bold">Durasi sesi</p>
-            <p className="display-num text-[44px] mt-1.5">
+            <p className="timer-num text-[36px] mt-1.5">
               {fmtDuration(active ? elapsed : doneToday?.durationSec || 0)}
             </p>
 
@@ -295,7 +295,7 @@ function DetailHeader({ day, onBack, pos }) {
           <Chip tone="lime">{day.special ? 'Non-siklus' : `Hari ${day.num}`}</Chip>
           {pos && <span className="text-[11px] text-muted">posisi {pos.position}/{pos.total} siklus</span>}
         </div>
-        <h1 className="display text-[27px] mt-1.5 truncate">{day.title}</h1>
+        <h1 className="display text-[21px] mt-1 truncate">{day.title}</h1>
       </div>
       <span className="w-10 h-10 shrink-0 grid place-items-center rounded-2xl bg-lime-accent/12 text-lime-accent">
         <Icon size={20} />

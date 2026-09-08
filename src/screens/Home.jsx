@@ -44,13 +44,13 @@ export default function Home({ onOpenDay, onGoTab }) {
       <header className="flex items-start justify-between gap-3 pt-1">
         <div className="min-w-0">
           <p className="text-[13px] text-muted">{formatLong(today)}</p>
-          <h1 className="display text-[34px] mt-1">Hi {state.profile.name || 'there'},</h1>
+          <h1 className="display text-[27px] mt-1">Hi {state.profile.name || 'there'},</h1>
           <p className="text-[14px] text-muted leading-snug">Ready to crush your goals today?</p>
         </div>
         <button
           type="button"
           onClick={() => onGoTab('profile')}
-          className="display w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-lime-accent text-ink-900 text-[22px] pt-0.5"
+          className="display w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-lime-accent text-ink-900 text-[18px]"
           aria-label="Buka profil"
         >
           {(state.profile.name || 'H').slice(0, 1).toUpperCase()}
@@ -61,7 +61,7 @@ export default function Home({ onOpenDay, onGoTab }) {
       <Card className="p-5">
         <div className="flex items-center gap-5">
           <ProgressRing value={progress.pct} size={132} stroke={11}>
-            <span className="display-num text-[40px]">{progress.pct}%</span>
+            <span className="display-num text-[32px]">{progress.pct}%</span>
             <span className="text-[10.5px] uppercase tracking-wider text-muted mt-1">
               {day.special ? 'Hari aktif' : 'Sesi hari ini'}
             </span>
@@ -111,7 +111,7 @@ export default function Home({ onOpenDay, onGoTab }) {
                   </span>
                 )}
               </div>
-              <p className="display text-[32px] mt-2.5">{day.title}</p>
+              <p className="display text-[25px] mt-2">{day.title}</p>
               <p className="text-[13px] font-semibold opacity-70 mt-0.5">
                 {day.special
                   ? day.blurb
@@ -315,7 +315,7 @@ function MiniRing({ value, big, suffix, label, icon: Icon }) {
         <Icon size={16} className="text-lime-accent" />
       </ProgressRing>
       <div className="min-w-0">
-        <p className="display-num text-[24px]">
+        <p className="display-num text-[20px]">
           {big}
           {suffix && <span className="font-sans text-[12px] font-bold text-muted ml-1">{suffix}</span>}
         </p>

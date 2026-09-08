@@ -24,7 +24,7 @@ export default function RestTimerBar() {
             <p className={cx('text-[10.5px] uppercase tracking-wider font-bold', done ? 'text-ink-900/70' : 'text-muted')}>
               {done ? 'Istirahat selesai — gas set berikutnya' : rest.timer.label}
             </p>
-            <p className={cx('display-num text-[30px] mt-1', !done && 'text-lime-accent')}>
+            <p className={cx('timer-num text-[26px] mt-1', !done && 'text-lime-accent')}>
               {fmtDuration(rest.remaining)}
             </p>
           </div>

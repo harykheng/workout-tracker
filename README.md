@@ -43,14 +43,15 @@ Di luar siklus: **Padel** (auto-log sebagai leg + cardio) dan **Rest/Swim day**.
 
 ## Tipografi
 
-- **Bebas Neue** — judul, nama hari, dan angka besar (persentase ring, timer, stat card). Caps-only &
-  condensed, kesan gym/angkat beban.
-- **Inter** — body, nama gerakan, label, input, tabel.
+- **Kanit Bold (700)** — judul screen, nama hari, judul section & sheet, dan angka besar yang jarang
+  berubah (persen ring, berat badan, streak, stat card). Utility: `.display` / `.display-num`.
+- **Outfit** — body, nama gerakan, label, input, tabel, tombol.
+- Angka yang berdetak tiap detik (timer sesi, rest timer) pakai utility `.timer-num` — Outfit bold dengan
+  `tabular-nums`. Kanit tidak punya tabular figures (lebar "1" cuma separuh "0"), jadi timer akan goyang
+  kalau dipaksa pakai Kanit.
 
-Kedua font di-host sendiri di `src/assets/fonts/` (subset latin, total ~62 KB) dan di-bundle Vite — jadi
-jalan offline, tanpa request ke Google Fonts dan tanpa layout shift. Utility-nya: `.display` untuk judul
-(otomatis uppercase) dan `.display-num` untuk angka. Digit Bebas Neue lebarnya seragam, jadi timer yang
-berdetak tidak goyang.
+Kedua font di-host sendiri di `src/assets/fonts/` (subset latin, total ~51 KB) dan di-bundle Vite — jalan
+offline, tanpa request ke Google Fonts dan tanpa layout shift.
 
 ## Struktur
 

@@ -25,7 +25,7 @@ export default function Progress() {
   return (
     <div className="anim-screen space-y-5">
       <header className="pt-1">
-        <h1 className="display text-[34px]">Progress</h1>
+        <h1 className="display text-[27px]">Progress</h1>
         <p className="text-[13px] text-muted mt-0.5">
           {w.daysLeft > 0 ? `${w.daysLeft} hari lagi ke ${formatFull(state.profile.targetDate)}` : 'Target date sudah lewat'}
         </p>
@@ -57,7 +57,7 @@ export default function Progress() {
           <Card className="p-5">
             <div className="flex items-center gap-5">
               <ProgressRing value={w.pct} size={128} stroke={11}>
-                <span className="display-num text-[40px]">{w.current}</span>
+                <span className="display-num text-[32px]">{w.current}</span>
                 <span className="text-[11px] text-muted uppercase tracking-wider mt-0.5">kg sekarang</span>
               </ProgressRing>
               <div className="flex-1 min-w-0 space-y-2.5">
@@ -154,7 +154,7 @@ export default function Progress() {
           <Card className="p-5">
             <div className="flex items-center gap-5">
               <ProgressRing value={Math.min(100, (streak.current / Math.max(7, streak.best)) * 100)} size={112} stroke={10}>
-                <span className="display-num text-[42px]">{streak.current}</span>
+                <span className="display-num text-[33px]">{streak.current}</span>
                 <span className="text-[10px] uppercase tracking-wider text-muted mt-1">hari streak</span>
               </ProgressRing>
               <div className="flex-1 min-w-0 space-y-2.5">

@@ -16,7 +16,7 @@ export default function Workouts({ onOpenDay }) {
   return (
     <div className="anim-screen space-y-5">
       <header className="pt-1">
-        <h1 className="display text-[34px]">Workouts</h1>
+        <h1 className="display text-[27px]">Workouts</h1>
         <p className="text-[13px] text-muted mt-0.5">Siklus 4 hari + hari di luar siklus</p>
       </header>
 
@@ -73,7 +73,7 @@ export default function Workouts({ onOpenDay }) {
                         {isNext && <Chip tone="lime">berikutnya</Chip>}
                         {day.hasGym && mode === 'gym' && <Chip>gym</Chip>}
                       </span>
-                      <span className="display block text-[19px] mt-1 truncate">{day.title}</span>
+                      <span className="display block text-[16px] mt-0.5 truncate">{day.title}</span>
                       <span className="block text-[11.5px] text-muted mt-0.5">
                         {resolveExercises(day, { mode }).length} gerakan · {requiredSetCount(day, { mode })} set
                         {lastDone ? ` · terakhir ${relativeLabel(lastDone.date)}` : ' · belum pernah'}
@@ -108,7 +108,7 @@ export default function Workouts({ onOpenDay }) {
                       <Icon size={22} />
                     </span>
                     <span className="flex-1 min-w-0">
-                      <span className="display block text-[19px]">{day.title}</span>
+                      <span className="display block text-[16px]">{day.title}</span>
                       <span className="block text-[11.5px] text-muted mt-0.5 truncate">
                         {day.blurb}
                         {last ? ` · terakhir ${relativeLabel(last.date)}` : ''}
