@@ -57,13 +57,23 @@ renang 6-8,3 tergantung intensitas; aktivitas custom 4-8. Angka otomatis ini bis
 "Selesaikan sesi" atau saat mencatat hari non-siklus — isi angka dari jam tangan / heart rate monitor kalau
 punya, karena itu lebih akurat.
 
+Tab **Kalori** di Progress menampilkan total kalori hari ini, rinciannya per aktivitas, grafik batang 14 hari,
+dan daftar total harian yang sudah dicatat. Total kalori hari ini juga tampil di stat card Home — tap kartunya
+buat langsung input angka dari jam tangan.
+
+**Total harian dari jam tangan (Garmin / Apple Watch).** Isi angka *total calories* satu hari penuh (bukan
+active calories) lewat tab Kalori. Kalau ada, angka terukur ini dipakai sebagai TDEE menggantikan estimasi
+BMR × faktor aktivitas — jauh lebih akurat, dan target asupan harian ikut menyesuaikan. Disimpan sebagai
+`dailyBurn: [{ date, kcal, source }]`.
+
 Panel **Hitungan defisit** di tab Progress memakai patokan 1 kg lemak ≈ 7.700 kcal:
 
 - defisit total yang dibutuhkan = sisa kg × 7.700, dibagi jumlah hari tersisa
 - rata-rata pembakaran workout 14 hari terakhir
 - sisanya yang harus datang dari makan
-- target asupan harian = BMR (Mifflin-St Jeor) × faktor aktivitas harian + pembakaran workout − defisit
-  (muncul kalau umur sudah diisi di tab Profile)
+- target asupan harian = TDEE − defisit, dengan TDEE diambil dari rata-rata total harian jam tangan kalau
+  ada; kalau belum ada, dari BMR (Mifflin-St Jeor) × faktor aktivitas + pembakaran workout (butuh umur diisi
+  di tab Profile)
 
 Ada dua rambu: kalau target asupan jatuh di bawah 1.500 kcal (pria) / 1.200 kcal (wanita), atau kalau laju
 yang dibutuhkan lebih dari 1,1% berat badan per minggu, app kasih peringatan buat mundurin deadline —

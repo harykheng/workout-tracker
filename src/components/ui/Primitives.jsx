@@ -100,11 +100,15 @@ export function ProgressRing({
 
 /* ------------------------------------------------------------ StatCard */
 
-export function StatCard({ icon: Icon, value, label, accent = false, className }) {
+export function StatCard({ icon: Icon, value, label, accent = false, className, onClick }) {
+  const Tag = onClick ? 'button' : 'div';
   return (
-    <div
+    <Tag
+      type={onClick ? 'button' : undefined}
+      onClick={onClick}
       className={cx(
         'flex-1 rounded-2xl bg-ink-800 border border-white/5 px-3 py-3.5 flex flex-col items-center gap-1.5 min-w-0',
+        onClick && 'transition active:scale-[0.97] hover:bg-ink-750 cursor-pointer',
         className
       )}
     >
@@ -115,7 +119,7 @@ export function StatCard({ icon: Icon, value, label, accent = false, className }
       )}
       <span className="display-num text-[20px] truncate max-w-full">{value}</span>
       <span className="text-[10.5px] uppercase tracking-wider text-muted text-center leading-tight">{label}</span>
-    </div>
+    </Tag>
   );
 }
 

@@ -9,6 +9,7 @@
  *   active:   Session | null,          // sesi yang lagi jalan (tahan refresh)
  *   sessions: Session[],               // riwayat, terbaru di depan
  *   weights:  [{ date, kg }],          // berat badan, urut menaik
+ *   dailyBurn:[{ date, kcal, source }], // total kalori terbakar sehari (mis. dari Garmin)
  *   media:    { [searchTerm]: { url, source, ts } }  // cache hasil API gambar/GIF
  * }
  *
@@ -52,6 +53,7 @@ export const DEFAULT_STATE = {
   active: null,
   sessions: [],
   weights: [],
+  dailyBurn: [],
   media: {},
 };
 
@@ -77,6 +79,12 @@ export function normalize(raw) {
       ? src.weights
           .filter((w) => isObj(w) && w.date && Number.isFinite(Number(w.kg)))
           .map((w) => ({ date: String(w.date), kg: Number(w.kg) }))
+          .sort((a, b) => (a.date < b.date ? -1 : 1))
+      : [],
+    dailyBurn: Array.isArray(src.dailyBurn)
+      ? src.dailyBurn
+          .filter((d) => isObj(d) && d.date && Number(d.kcal) > 0)
+          .map((d) => ({ date: String(d.date), kcal: Math.round(Number(d.kcal)), source: d.source || 'manual' }))
           .sort((a, b) => (a.date < b.date ? -1 : 1))
       : [],
     media: isObj(src.media) ? src.media : {},

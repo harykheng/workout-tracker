@@ -260,6 +260,23 @@ export function StoreProvider({ children }) {
         setState((s) => ({ ...s, weights: s.weights.filter((w) => w.date !== date) }));
       },
 
+      /* ------------------------------------------------ kalori harian total */
+      setDailyBurn(date, kcal, source = 'garmin') {
+        const value = Number(kcal);
+        setState((s) => {
+          const rest = s.dailyBurn.filter((d) => d.date !== date);
+          if (!Number.isFinite(value) || value <= 0) return { ...s, dailyBurn: rest };
+          return {
+            ...s,
+            dailyBurn: [...rest, { date, kcal: Math.round(value), source }].sort((a, b) => (a.date < b.date ? -1 : 1)),
+          };
+        });
+      },
+
+      removeDailyBurn(date) {
+        setState((s) => ({ ...s, dailyBurn: s.dailyBurn.filter((d) => d.date !== date) }));
+      },
+
       /* ------------------------------------------------------------- misc */
       cacheMedia(term, payload) {
         setState((s) => ({ ...s, media: { ...s.media, [term]: payload } }));

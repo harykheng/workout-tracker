@@ -68,7 +68,37 @@ export function bmr({ weightKg, heightCm, age, sex }) {
  *   targetIntake:number|null, sample:{days:number, sessions:number, kcal:number}
  * }}
  */
-export function energyPlan({ sessions, profile, currentWeight, daysLeft, remainingKg, windowDays = 14 }) {
+/** Total kalori workout pada satu tanggal. */
+export function dayWorkoutKcal(sessions, date, weightKg) {
+  return sessions
+    .filter((s) => s.completed && s.date === date)
+    .reduce((n, s) => n + sessionKcal(s, weightKg), 0);
+}
+
+/** Deret kalori harian untuk N hari terakhir (buat grafik batang). */
+export function dailySeries(sessions, dailyBurn, weightKg, days, addDaysFn, todayKeyFn) {
+  const out = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const date = addDaysFn(todayKeyFn(), -i);
+    const logged = dailyBurn.find((d) => d.date === date);
+    out.push({
+      date,
+      workout: dayWorkoutKcal(sessions, date, weightKg),
+      total: logged ? logged.kcal : null,
+    });
+  }
+  return out;
+}
+
+export function energyPlan({
+  sessions,
+  profile,
+  currentWeight,
+  daysLeft,
+  remainingKg,
+  dailyBurn = [],
+  windowDays = 14,
+}) {
   const start = Date.now() - windowDays * 86400000;
   const recent = sessions.filter((s) => s.completed && new Date(`${s.date}T12:00:00`).getTime() >= start);
   const burned = recent.reduce((n, s) => n + sessionKcal(s, currentWeight), 0);
@@ -78,6 +108,12 @@ export function energyPlan({ sessions, profile, currentWeight, daysLeft, remaini
   const totalDeficit = Math.round(kgToLose * KCAL_PER_KG_FAT);
   const days = Math.max(1, daysLeft);
   const perDayDeficit = Math.round(totalDeficit / days);
+
+  // Total harian terukur (mis. dari Garmin) jauh lebih akurat daripada BMR × faktor.
+  const recentDaily = dailyBurn.filter((d) => new Date(`${d.date}T12:00:00`).getTime() >= start);
+  const measuredTdee = recentDaily.length
+    ? Math.round(recentDaily.reduce((n, d) => n + d.kcal, 0) / recentDaily.length)
+    : null;
 
   const restingBmr = bmr({
     weightKg: currentWeight,
@@ -89,7 +125,11 @@ export function energyPlan({ sessions, profile, currentWeight, daysLeft, remaini
   // workout tidak kehitung dua kali.
   const factor = Number(profile.activityFactor) || 1.35;
   const tdeeBase = restingBmr ? Math.round(restingBmr * factor) : null;
-  const targetIntake = tdeeBase ? Math.round(tdeeBase + burnPerDay - perDayDeficit) : null;
+
+  // Angka terukur sudah termasuk workout, jadi tidak perlu ditambah burnPerDay lagi.
+  const tdee = measuredTdee ?? (tdeeBase === null ? null : tdeeBase + burnPerDay);
+  const tdeeSource = measuredTdee ? 'measured' : tdeeBase ? 'estimated' : null;
+  const targetIntake = tdee === null ? null : Math.round(tdee - perDayDeficit);
 
   // Rambu keamanan: defisit yang terlalu dalam bikin kehilangan massa otot,
   // dan asupan di bawah lantai ini tidak dianjurkan tanpa pengawasan.
@@ -120,6 +160,10 @@ export function energyPlan({ sessions, profile, currentWeight, daysLeft, remaini
     fromFoodPerDay: Math.max(0, perDayDeficit - burnPerDay),
     bmr: restingBmr,
     tdeeBase,
+    tdee,
+    tdeeSource,
+    measuredTdee,
+    measuredDays: recentDaily.length,
     targetIntake,
     sample: { days: windowDays, sessions: recent.length, kcal: burned },
   };

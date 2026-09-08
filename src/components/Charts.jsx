@@ -189,4 +189,31 @@ export function VolumeBars({ items = [], max, className }) {
   );
 }
 
+/** Batang kalori harian. `value` = kalori workout, `marker` = total harian (Garmin). */
+export function DailyKcalBars({ items = [], height = 96 }) {
+  const peak = Math.max(1, ...items.map((i) => i.value));
+  return (
+    <div className="flex items-end gap-1" style={{ height }}>
+      {items.map((item) => (
+        <div key={item.label} className="flex-1 flex flex-col items-center gap-1 min-w-0 h-full">
+          <div className="w-full flex-1 flex items-end">
+            <div
+              className={cx('w-full rounded-t-md transition-all duration-500', item.value ? 'bg-lime-accent' : 'bg-white/8')}
+              style={{ height: `${Math.max(item.value ? 8 : 3, (item.value / peak) * 100)}%` }}
+              title={`${item.label}: ${item.value} kcal workout`}
+            />
+          </div>
+          {/* Titik = hari yang total hariannya sudah dicatat dari jam tangan.
+              Nilainya tidak diplot karena skalanya jauh beda (ribuan vs ratusan). */}
+          <span
+            className={cx('w-1.5 h-1.5 rounded-full', item.marker ? 'bg-sky-400' : 'bg-transparent')}
+            title={item.marker ? `Total harian ${item.marker} kcal` : undefined}
+          />
+          <span className="text-[9px] text-muted truncate w-full text-center">{item.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export { diffDays };

@@ -242,6 +242,14 @@ export const IconImage = (p) => (
   </Svg>
 );
 
+export const IconWatch = (p) => (
+  <Svg {...p}>
+    <rect x="6.5" y="6.5" width="11" height="11" rx="3.5" />
+    <path d="M9 6.5 9.4 3h5.2l.4 3.5M9 17.5l.4 3.5h5.2l.4-3.5" />
+    <path d="M12 9.6v2.6l1.8 1.2" />
+  </Svg>
+);
+
 export const IconFire = (p) => (
   <Svg {...p}>
     <path d="M12 2.8c.4 2.6-.9 4-2.1 5.2C8.4 9.4 7 10.8 7 13.4a5 5 0 0 0 10 0c0-2-.8-3.5-1.8-4.7-.5 1-1.2 1.6-2 1.9.6-2.6-.3-5.6-1.2-7.8z" />

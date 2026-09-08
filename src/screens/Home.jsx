@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { CYCLE_DAYS, SPECIAL_DAYS, getDay, resolveExercises, requiredSetCount, sessionTitle } from '../data/schedule.js';
 import { useStore } from '../hooks/useStore.jsx';
 import { resolveTodayDayId, cyclePosition, computeStreak, weekSummary, weightStats, sessionProgress, sessionSetStats } from '../lib/stats.js';
-import { sessionKcal, estimateKcal } from '../lib/energy.js';
+import { sessionKcal, estimateKcal, dayWorkoutKcal } from '../lib/energy.js';
+import DailyBurnSheet from '../components/DailyBurnSheet.jsx';
 import { todayKey, formatLong, fmtDurationShort, fmtDuration, diffDays, addDays } from '../lib/date.js';
 import { Button, Card, Chip, ProgressRing, StatCard, StatRow, Segmented, Sheet, SectionTitle, cx } from '../components/ui/Primitives.jsx';
 import {
@@ -16,6 +17,7 @@ export default function Home({ onOpenDay, onGoTab }) {
   const { state, actions } = useStore();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [zoomEx, setZoomEx] = useState(null);
+  const [burnOpen, setBurnOpen] = useState(false);
   const [specialSheet, setSpecialSheet] = useState(null);
 
   const today = todayKey();
@@ -28,6 +30,11 @@ export default function Home({ onOpenDay, onGoTab }) {
   const streak = useMemo(() => computeStreak(state.sessions), [state.sessions]);
   const week = useMemo(() => weekSummary(state.sessions), [state.sessions]);
   const weight = useMemo(() => weightStats(state), [state]);
+  const todayKcal = useMemo(
+    () => dayWorkoutKcal(state.sessions, todayKey(), weight.current),
+    [state.sessions, weight.current]
+  );
+  const dailyTotal = state.dailyBurn.find((d) => d.date === todayKey())?.kcal || 0;
   const weekKcal = useMemo(
     () =>
       state.sessions
@@ -97,8 +104,14 @@ export default function Home({ onOpenDay, onGoTab }) {
 
       {/* ------------------------------------------------------ stat cards */}
       <StatRow>
-        <StatCard icon={IconFire} value={weekKcal ? `${weekKcal}` : '0'} label="Kcal / 7 hari" accent />
-        <StatCard icon={IconTimer} value={fmtDurationShort(week.totalSec)} label="Durasi" />
+        <StatCard
+          icon={IconFire}
+          value={dailyTotal ? `${dailyTotal}` : todayKcal ? `${todayKcal}` : '0'}
+          label={dailyTotal ? 'Kcal hari ini (total)' : 'Kcal hari ini (workout)'}
+          accent
+          onClick={() => setBurnOpen(true)}
+        />
+        <StatCard icon={IconTimer} value={weekKcal ? `${weekKcal}` : '0'} label="Kcal / 7 hari" />
         <StatCard icon={IconFlame} value={`${week.activeDays}/7`} label="Hari aktif" />
       </StatRow>
 
@@ -304,6 +317,8 @@ export default function Home({ onOpenDay, onGoTab }) {
       />
 
       <ExerciseMediaSheet exercise={zoomEx} onClose={() => setZoomEx(null)} />
+
+      <DailyBurnSheet open={burnOpen} onClose={() => setBurnOpen(false)} />
 
       <SpecialLogSheet
         day={specialSheet}

@@ -1,16 +1,18 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../hooks/useStore.jsx';
 import { sessionTitle } from '../data/schedule.js';
-import { energyPlan, sessionKcal, kcalToKg, KCAL_PER_KG_FAT } from '../lib/energy.js';
+import { energyPlan, sessionKcal, KCAL_PER_KG_FAT, dayWorkoutKcal, dailySeries } from '../lib/energy.js';
 import { weightStats, computeStreak, buildExerciseLog, weekSummary } from '../lib/stats.js';
-import { todayKey, formatFull, relativeLabel, diffDays, fmtDurationShort } from '../lib/date.js';
-import { WeightChart, Sparkline } from '../components/Charts.jsx';
+import { todayKey, formatFull, relativeLabel, diffDays, fmtDurationShort, addDays, formatShort } from '../lib/date.js';
+import { WeightChart, Sparkline, DailyKcalBars } from '../components/Charts.jsx';
+import DailyBurnSheet from '../components/DailyBurnSheet.jsx';
 import HistoryCalendar from '../components/HistoryCalendar.jsx';
 import {
   Button, Card, Chip, ProgressRing, SectionTitle, StatCard, StatRow, Sheet, Input, Field, cx, EmptyState,
 } from '../components/ui/Primitives.jsx';
 import {
   IconScale, IconFlame, IconTarget, IconChevronDown, IconPlus, IconTrash, IconChart, IconLayers, IconTimer, IconFire,
+  IconWatch,
 } from '../components/ui/Icons.jsx';
 
 export default function Progress() {
@@ -18,11 +20,25 @@ export default function Progress() {
   const [tab, setTab] = useState('weight');
   const [addOpen, setAddOpen] = useState(false);
   const [dayDetail, setDayDetail] = useState(null);
+  const [burnOpen, setBurnOpen] = useState(false);
+  const [burnDate, setBurnDate] = useState(todayKey());
 
   const w = useMemo(() => weightStats(state), [state]);
   const streak = useMemo(() => computeStreak(state.sessions), [state.sessions]);
   const week = useMemo(() => weekSummary(state.sessions), [state.sessions]);
   const exLog = useMemo(() => buildExerciseLog(state.sessions), [state.sessions]);
+  const todaySessions = state.sessions.filter((s) => s.completed && s.date === todayKey());
+  const todayWorkout = dayWorkoutKcal(state.sessions, todayKey(), w.current);
+  const todayTotal = state.dailyBurn.find((d) => d.date === todayKey())?.kcal || 0;
+  const series = useMemo(
+    () =>
+      dailySeries(state.sessions, state.dailyBurn, w.current, 14, addDays, todayKey).map((d) => ({
+        label: formatShort(d.date).split(' ')[0],
+        value: d.workout,
+        marker: d.total,
+      })),
+    [state.sessions, state.dailyBurn, w.current]
+  );
   const energy = useMemo(
     () =>
       energyPlan({
@@ -31,8 +47,9 @@ export default function Progress() {
         currentWeight: w.current,
         daysLeft: w.daysLeft,
         remainingKg: w.remaining,
+        dailyBurn: state.dailyBurn,
       }),
-    [state.sessions, state.profile, w.current, w.daysLeft, w.remaining]
+    [state.sessions, state.profile, w.current, w.daysLeft, w.remaining, state.dailyBurn]
   );
 
   return (
@@ -46,7 +63,8 @@ export default function Progress() {
 
       <div className="flex p-1 rounded-2xl bg-ink-800 border border-white/5">
         {[
-          { id: 'weight', label: 'Berat badan' },
+          { id: 'weight', label: 'Berat' },
+          { id: 'kcal', label: 'Kalori' },
           { id: 'history', label: 'Kalender' },
           { id: 'lifts', label: 'Beban' },
         ].map((t) => (
@@ -55,7 +73,7 @@ export default function Progress() {
             type="button"
             onClick={() => setTab(t.id)}
             className={cx(
-              'flex-1 py-2 rounded-xl text-[12.5px] font-bold transition-all duration-250',
+              'flex-1 py-2 rounded-xl text-[12px] font-bold transition-all duration-250',
               tab === t.id ? 'bg-lime-accent text-ink-900' : 'text-muted hover:text-white'
             )}
           >
@@ -116,8 +134,6 @@ export default function Progress() {
             </Card>
           )}
 
-          <EnergyPanel energy={energy} />
-
           <Button className="w-full" size="lg" onClick={() => setAddOpen(true)}>
             <IconPlus size={16} /> Catat berat badan
           </Button>
@@ -157,6 +173,107 @@ export default function Progress() {
                     </Card>
                   );
                 })}
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+
+      {/* ---------------------------------------------------------- kalori */}
+      {tab === 'kcal' && (
+        <div className="space-y-4 anim-fade">
+          <Card className="p-5">
+            <p className="text-[11px] uppercase tracking-wider text-muted font-bold">Kalori hari ini</p>
+            <div className="flex items-end gap-3 mt-1.5">
+              <p className="display-num text-[44px] text-lime-accent">
+                {(todayTotal || todayWorkout).toLocaleString('id')}
+              </p>
+              <p className="text-[12px] text-muted pb-2">{todayTotal ? 'total (jam tangan)' : 'dari workout'}</p>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              {todaySessions.length === 0 ? (
+                <p className="text-[12.5px] text-muted">Belum ada aktivitas tercatat hari ini.</p>
+              ) : (
+                todaySessions.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between gap-3 text-[12.5px]">
+                    <span className="text-muted truncate">{sessionTitle(s)}</span>
+                    <span className="font-bold tabular shrink-0">{sessionKcal(s, w.current)} kcal</span>
+                  </div>
+                ))
+              )}
+              {todayTotal > 0 && (
+                <div className="flex items-center justify-between gap-3 text-[12.5px] pt-2 border-t border-white/5">
+                  <span className="text-muted">Non-workout (BMR + aktivitas harian)</span>
+                  <span className="font-bold tabular shrink-0">{Math.max(0, todayTotal - todayWorkout)} kcal</span>
+                </div>
+              )}
+            </div>
+
+            <Button
+              variant="ghost"
+              className="w-full mt-4"
+              onClick={() => {
+                setBurnDate(todayKey());
+                setBurnOpen(true);
+              }}
+            >
+              <IconWatch size={15} /> {todayTotal ? 'Ubah total harian' : 'Input total harian (Garmin)'}
+            </Button>
+          </Card>
+
+          <Card className="p-4">
+            <div className="flex items-baseline justify-between mb-3">
+              <p className="text-[13px] font-bold">Kalori workout 14 hari</p>
+              <p className="text-[11.5px] text-muted tabular">rata² {energy.burnPerDay} kcal/hari</p>
+            </div>
+            <DailyKcalBars items={series} />
+            <p className="text-[11px] text-muted mt-2.5 leading-relaxed">
+              Batang lime = estimasi pembakaran workout. Titik biru = hari yang total hariannya sudah dicatat dari
+              jam tangan — angkanya tidak ikut diplot karena skalanya beda jauh (ribuan vs ratusan).
+            </p>
+          </Card>
+
+          <EnergyPanel energy={energy} />
+
+          <section>
+            <SectionTitle>Total harian tercatat</SectionTitle>
+            {state.dailyBurn.length === 0 ? (
+              <EmptyState
+                icon={IconWatch}
+                title="Belum ada data jam tangan"
+                text="Input total kalori harian dari Garmin biar target asupannya pakai angka terukur, bukan estimasi BMR."
+              />
+            ) : (
+              <div className="space-y-2">
+                {[...state.dailyBurn].reverse().map((d) => (
+                  <Card key={d.date} className="p-3 flex items-center gap-3">
+                    <span className="w-10 h-10 grid place-items-center rounded-xl bg-white/5 text-muted shrink-0">
+                      <IconWatch size={17} />
+                    </span>
+                    <button
+                      type="button"
+                      className="flex-1 min-w-0 text-left"
+                      onClick={() => {
+                        setBurnDate(d.date);
+                        setBurnOpen(true);
+                      }}
+                    >
+                      <p className="text-[14px] font-bold tabular">{d.kcal.toLocaleString('id')} kcal</p>
+                      <p className="text-[11.5px] text-muted">
+                        {formatFull(d.date)} · workout {dayWorkoutKcal(state.sessions, d.date, w.current)} kcal
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => actions.removeDailyBurn(d.date)}
+                      className="w-7 h-7 grid place-items-center rounded-full text-muted hover:text-red-300 transition shrink-0"
+                      aria-label="Hapus data"
+                    >
+                      <IconTrash size={14} />
+                    </button>
+                  </Card>
+                ))}
               </div>
             )}
           </section>
@@ -229,6 +346,8 @@ export default function Progress() {
         </div>
       )}
 
+      <DailyBurnSheet open={burnOpen} onClose={() => setBurnOpen(false)} date={burnDate} />
+
       <AddWeightSheet
         open={addOpen}
         onClose={() => setAddOpen(false)}
@@ -296,8 +415,9 @@ function EnergyPanel({ energy }) {
                 {energy.targetIntake.toLocaleString('id')} <span className="font-sans text-[13px] font-bold">kcal</span>
               </p>
               <p className="text-[11.5px] text-muted leading-relaxed mt-2">
-                Dari BMR {energy.bmr} kcal × aktivitas harian = {energy.tdeeBase} kcal, ditambah rata-rata pembakaran
-                workout {energy.burnPerDay} kcal, dikurangi defisit {energy.perDayDeficit} kcal.
+                {energy.tdeeSource === 'measured'
+                  ? `Dari rata-rata total harian jam tangan ${energy.measuredTdee} kcal (${energy.measuredDays} hari tercatat), dikurangi defisit ${energy.perDayDeficit} kcal. Angka terukur lebih dipercaya daripada estimasi BMR.`
+                  : `Dari BMR ${energy.bmr} kcal × aktivitas harian = ${energy.tdeeBase} kcal, ditambah rata-rata pembakaran workout ${energy.burnPerDay} kcal, dikurangi defisit ${energy.perDayDeficit} kcal. Input total harian dari Garmin buat angka yang lebih akurat.`}
               </p>
             </div>
           ) : energy.targetIntake ? null : (
