@@ -46,8 +46,18 @@ export default function Home({ onOpenDay, onGoTab }) {
   const todaySessions = state.sessions.filter((s) => s.date === today && s.completed);
   const activeToday = state.active?.date === today ? state.active : null;
   const doneSessionForDay = todaySessions.find((s) => s.dayId === dayId);
+
+  // Progres yang dipakai daftar gerakan di bawah — terikat ke hari yang lagi
+  // ditampilkan di CTA (hari berikutnya kalau hari ini sudah kelar).
   const shownSession = activeToday?.dayId === dayId ? activeToday : doneSessionForDay;
-  const progress = shownSession ? sessionProgress(shownSession, day) : { pct: 0, done: 0, total: 0 };
+  const planProgress = shownSession ? sessionProgress(shownSession, day) : { pct: 0, done: 0, total: 0 };
+
+  // Ring hero = apa yang benar-benar dikerjakan HARI INI, bukan hari yang
+  // antre berikutnya. Setelah Hari 1 selesai, siklus bergeser ke Hari 2 —
+  // ring harus tetap menunjukkan Hari 1 yang barusan kelar.
+  const ringSession = activeToday || todaySessions[0] || null;
+  const ringDay = getDay(ringSession?.dayId) || day;
+  const progress = ringSession ? sessionProgress(ringSession, ringDay) : { pct: 0, done: 0, total: 0 };
 
   const exercises = day.special ? [] : resolveExercises(day, { mode, skipLegSprinkle: false, includeCore: false });
   const totalSets = day.special ? 0 : requiredSetCount(day, { mode });
@@ -79,8 +89,12 @@ export default function Home({ onOpenDay, onGoTab }) {
         <div className="flex items-center gap-5">
           <ProgressRing value={progress.pct} size={132} stroke={11}>
             <span className="display-num text-[32px]">{progress.pct}%</span>
-            <span className="text-[10.5px] uppercase tracking-wider text-muted mt-1">
-              {day.special ? 'Hari aktif' : 'Sesi hari ini'}
+            <span className="text-[10.5px] uppercase tracking-wider text-muted mt-1 leading-tight px-2">
+              {ringSession
+                ? ringDay.special
+                  ? ringDay.title
+                  : `Hari ${ringDay.num}${activeToday ? '' : ' selesai'}`
+                : 'Belum mulai'}
             </span>
           </ProgressRing>
 
@@ -193,7 +207,7 @@ export default function Home({ onOpenDay, onGoTab }) {
           <SectionTitle
             action={
               <span className="text-[12px] text-muted tabular">
-                {progress.done}/{progress.total || totalSets} set
+                {planProgress.done}/{planProgress.total || totalSets} set
               </span>
             }
           >
