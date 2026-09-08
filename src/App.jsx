@@ -79,9 +79,9 @@ function ResumeBar({ active, onOpen }) {
           <span className="block text-[10.5px] font-extrabold uppercase tracking-wider opacity-70">
             {active.running ? 'Sesi berjalan' : 'Sesi dijeda'}
           </span>
-          <span className="block text-[14px] font-extrabold truncate">{day?.title || 'Workout'}</span>
+          <span className="display block text-[18px] truncate">{day?.title || 'Workout'}</span>
         </span>
-        <span className="text-[18px] font-extrabold tabular">{fmtDuration(elapsed)}</span>
+        <span className="display-num text-[22px]">{fmtDuration(elapsed)}</span>
       </span>
     </button>
   );

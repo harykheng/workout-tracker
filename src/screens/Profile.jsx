@@ -42,11 +42,11 @@ export default function Profile() {
   return (
     <div className="anim-screen space-y-5">
       <header className="flex items-center gap-4 pt-1">
-        <span className="w-16 h-16 shrink-0 grid place-items-center rounded-3xl bg-lime-accent text-ink-900 text-[24px] font-extrabold">
+        <span className="display w-16 h-16 shrink-0 grid place-items-center rounded-3xl bg-lime-accent text-ink-900 text-[32px] pt-1">
           {(profile.name || 'H').slice(0, 1).toUpperCase()}
         </span>
         <div className="min-w-0">
-          <h1 className="text-[24px] font-extrabold leading-tight truncate">{profile.name || 'Kamu'}</h1>
+          <h1 className="display text-[32px] truncate">{profile.name || 'Kamu'}</h1>
           <p className="text-[13px] text-muted">
             {profile.heightCm} cm · {w.current} kg · target {profile.targetMinKg}-{profile.targetMaxKg} kg
           </p>

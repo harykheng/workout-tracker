@@ -41,6 +41,17 @@ Di luar siklus: **Padel** (auto-log sebagai leg + cardio) dan **Rest/Swim day**.
   kelihatan.
 - **Export / import JSON** buat backup.
 
+## Tipografi
+
+- **Bebas Neue** — judul, nama hari, dan angka besar (persentase ring, timer, stat card). Caps-only &
+  condensed, kesan gym/angkat beban.
+- **Inter** — body, nama gerakan, label, input, tabel.
+
+Kedua font di-host sendiri di `src/assets/fonts/` (subset latin, total ~62 KB) dan di-bundle Vite — jadi
+jalan offline, tanpa request ke Google Fonts dan tanpa layout shift. Utility-nya: `.display` untuk judul
+(otomatis uppercase) dan `.display-num` untuk angka. Digit Bebas Neue lebarnya seragam, jadi timer yang
+berdetak tidak goyang.
+
 ## Struktur
 
 ```

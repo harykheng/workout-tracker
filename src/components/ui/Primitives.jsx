@@ -15,7 +15,7 @@ export function Card({ className, as: Tag = 'div', ...rest }) {
 export function SectionTitle({ children, action }) {
   return (
     <div className="flex items-end justify-between mb-3 px-1">
-      <h2 className="text-[17px] font-bold tracking-tight">{children}</h2>
+      <h2 className="display text-[21px] tracking-wide">{children}</h2>
       {action}
     </div>
   );
@@ -88,7 +88,7 @@ export function ProgressRing({
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-3">
         {children ?? (
           <>
-            <span className="text-[30px] font-extrabold leading-none tabular">{Math.round(pct)}%</span>
+            <span className="display-num text-[38px]">{Math.round(pct)}%</span>
             {label && <span className="mt-1 text-[11px] uppercase tracking-wider text-muted">{label}</span>}
             {sublabel && <span className="text-[11px] text-muted">{sublabel}</span>}
           </>
@@ -113,7 +113,7 @@ export function StatCard({ icon: Icon, value, label, accent = false, className }
           <Icon size={17} />
         </span>
       )}
-      <span className="text-[19px] font-extrabold leading-none tabular truncate max-w-full">{value}</span>
+      <span className="display-num text-[24px] truncate max-w-full">{value}</span>
       <span className="text-[10.5px] uppercase tracking-wider text-muted text-center leading-tight">{label}</span>
     </div>
   );
@@ -248,7 +248,7 @@ export function Sheet({ open, onClose, title, children, footer }) {
         className="relative w-full sm:max-w-md max-h-[88vh] overflow-y-auto no-scrollbar bg-ink-850 border border-white/8 rounded-t-3xl sm:rounded-3xl anim-sheet"
       >
         <div className="sticky top-0 z-10 bg-ink-850/95 backdrop-blur px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/5">
-          <h3 className="text-base font-bold">{title}</h3>
+          <h3 className="display text-[21px]">{title}</h3>
           <button
             type="button"
             onClick={onClose}
@@ -319,7 +319,7 @@ export function EmptyState({ icon: Icon, title, text, action }) {
           <Icon size={24} />
         </span>
       )}
-      <p className="font-bold text-[15px]">{title}</p>
+      <p className="display text-[19px]">{title}</p>
       {text && <p className="text-[13px] text-muted mt-1.5 max-w-[36ch] leading-relaxed">{text}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
