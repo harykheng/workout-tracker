@@ -5,37 +5,17 @@ import { localFrames } from '../data/exerciseImages.js';
 import { cx } from './ui/Primitives.jsx';
 import { IconImage } from './ui/Icons.jsx';
 
-/* Satu ticker global buat semua kartu — bukan satu interval per gambar. */
-const listeners = new Set();
-let frameIndex = 0;
-let ticker = null;
-
-function subscribe(fn) {
-  listeners.add(fn);
-  if (!ticker) {
-    ticker = setInterval(() => {
-      frameIndex = (frameIndex + 1) % 2;
-      listeners.forEach((l) => l(frameIndex));
-    }, 900);
-  }
-  return () => {
-    listeners.delete(fn);
-    if (listeners.size === 0 && ticker) {
-      clearInterval(ticker);
-      ticker = null;
-    }
-  };
-}
-
-function useFrameTick(enabled, ms) {
-  const [i, setI] = useState(frameIndex);
+/* Animasi cuma hidup selama modal terbuka: satu interval lokal per komponen
+   yang mati sendiri saat komponennya dilepas. Thumbnail sengaja diam di frame
+   pertama — puluhan gambar yang berkedip bareng bikin daftar susah dibaca. */
+function useFrameTick(ms) {
+  const [i, setI] = useState(0);
   useEffect(() => {
-    if (!enabled) return undefined;
-    if (!ms) return subscribe(setI); // ikut ticker global biar semua kartu sinkron
+    if (!ms) return undefined;
     const id = setInterval(() => setI((v) => (v + 1) % 2), ms);
     return () => clearInterval(id);
-  }, [enabled, ms]);
-  return i;
+  }, [ms]);
+  return ms ? i : 0;
 }
 
 /**
@@ -53,7 +33,7 @@ export default function ExerciseMedia({
 }) {
   const { state, actions } = useStore();
   const frames = localFrames(term);
-  const tick = useFrameTick(!!frames && frames.length > 1, intervalMs);
+  const tick = useFrameTick(frames && frames.length > 1 ? intervalMs : 0);
 
   const [media, setMedia] = useState(() => (frames ? null : readCache(state.media, term)));
   const [status, setStatus] = useState(() => (frames || readCache(state.media, term) ? 'done' : 'idle'));
@@ -105,7 +85,8 @@ export default function ExerciseMedia({
       title={name}
     >
       {frames ? (
-        frames.map((src, i) => (
+        // saat diam, frame kedua tidak perlu ikut diunduh
+        (intervalMs ? frames : frames.slice(0, 1)).map((src, i) => (
           <img
             key={src}
             src={src}
@@ -114,7 +95,7 @@ export default function ExerciseMedia({
             aria-hidden={i !== 0}
             className={cx(
               'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
-              (frames.length === 1 ? 0 : tick) === i ? 'opacity-100' : 'opacity-0'
+              tick === i ? 'opacity-100' : 'opacity-0'
             )}
           />
         ))

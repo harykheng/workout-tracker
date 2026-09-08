@@ -143,8 +143,10 @@ Untuk gerakan yang belum punya gambar bundel, urutan fallback-nya: **wger API v2
 **ExerciseDB** (base URL & RapidAPI key opsional, diatur di tab Profile) → **placeholder inisial + ikon**.
 Semua kegagalan ditangani diam-diam; app tidak pernah crash karena gambar.
 
-Tap thumbnail gerakan (di Home, di daftar preview, atau di kartu sesi) buat buka tampilan besarnya —
-frame-nya berganti tiap 700 ms, lengkap dengan target set/reps, durasi rest, dan catatan tekniknya.
+Thumbnail di daftar sengaja **diam di frame pertama** — puluhan gambar yang berkedip bareng bikin daftar
+susah dibaca, dan frame kedua tidak ikut diunduh selama tidak dipakai. Tap thumbnail-nya (di Home, di daftar
+preview, atau di kartu sesi) buat buka tampilan besar: di sana frame-nya baru berganti tiap 700 ms, lengkap
+dengan target set/reps, durasi rest, dan catatan tekniknya. Interval-nya hidup hanya selama modal terbuka.
 
 Mau nambah gerakan baru? Taruh dua frame di `src/assets/exercises/<istilah-search-dengan-tanda-hubung>/`
 dan `data/exerciseImages.js` bakal otomatis nemuin lewat `import.meta.glob` — tidak perlu daftar manual.
