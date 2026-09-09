@@ -5,6 +5,7 @@ import { weightStats, computeStreak } from '../lib/stats.js';
 import { formatFull, todayKey } from '../lib/date.js';
 import { ACTIVITY_LEVELS, bmr } from '../lib/energy.js';
 import { previewBeep } from '../hooks/useRestTimer.jsx';
+import { InstallCard } from '../components/PWAPrompts.jsx';
 import {
   Button, Card, Field, Input, Select, SectionTitle, Switch, cx, useToast, Sheet, StatCard, StatRow,
 } from '../components/ui/Primitives.jsx';
@@ -60,6 +61,8 @@ export default function Profile() {
         <StatCard icon={IconScale} value={`${w.lost > 0 ? '-' : ''}${Math.abs(w.lost)}`} label="Kg turun" />
         <StatCard icon={IconTarget} value={w.daysLeft > 0 ? w.daysLeft : 0} label="Hari ke target" />
       </StatRow>
+
+      <InstallCard />
 
       {/* ---------------------------------------------------------- profil */}
       <section>

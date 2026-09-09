@@ -54,11 +54,26 @@
   button {
     font-family: inherit;
   }
+  /* iOS Safari otomatis nge-zoom kalau font input di bawah 16px. Ini satu-satunya
+     cara yang benar-benar mencegahnya — meta viewport user-scalable=no diabaikan
+     Safari untuk kasus ini. Ukuran visualnya dijaga lewat padding, bukan font. */
   input,
   select,
   textarea {
     font-family: inherit;
+    font-size: 16px;
     color-scheme: dark;
+  }
+
+  /* Hilangkan jeda 300 ms & zoom dari double-tap. */
+  button,
+  a,
+  label,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
   /* number inputs: hide spinners for a cleaner look */
   input[type="number"]::-webkit-outer-spin-button,
@@ -109,6 +124,10 @@
   }
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  /* Mode standalone iOS menaruh konten di bawah status bar. */
+  .safe-top {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
   }
   .tabular {
     font-variant-numeric: tabular-nums;

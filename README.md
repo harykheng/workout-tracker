@@ -44,6 +44,27 @@ tapi **tidak menggeser posisi siklus 4 hari**.
   kelihatan.
 - **Export / import JSON** buat backup.
 
+## PWA
+
+App-nya installable dan **jalan penuh tanpa koneksi**. `vite-plugin-pwa` (Workbox) mem-precache seluruh
+app shell: JS, CSS, font Kanit & Outfit, dan 52 gambar gerakan — 69 entri, ~1,1 MB. Kartu **Pasang sebagai
+aplikasi** di tab Profile memakai `beforeinstallprompt` di Chrome/Edge; di iOS Safari (yang tidak punya API
+itu) yang tampil langkah manual Share → Add to Home Screen.
+
+Update dipasang lewat `registerType: 'prompt'`, bukan `autoUpdate` — reload mendadak di tengah sesi, pas lagi
+mengisi reps, bisa menghilangkan ketikan yang belum tersimpan. Versi baru memunculkan banner kecil dan baru
+dipasang setelah tombolnya ditekan.
+
+Ikon dibuat dari SVG di `public/` (192, 512, maskable 512, dan apple-touch-icon 180).
+
+## Zoom di mobile
+
+Input di-set **16px** lewat aturan base di `index.css`. Ini bukan pilihan estetika: iOS Safari otomatis
+nge-zoom halaman begitu field dengan font di bawah 16px difokus, dan meta `user-scalable=no` diabaikan Safari
+untuk kasus ini — jadi ukuran font adalah satu-satunya cara yang benar-benar mencegahnya. Ukuran visual tetap
+terjaga lewat padding. Meta viewport juga mengunci `maximum-scale=1, user-scalable=no` (efektif di Android),
+dan `touch-action: manipulation` menghapus zoom serta jeda 300 ms dari double-tap.
+
 ## Kalori & defisit
 
 Estimasi kalori pakai rumus MET dari Compendium of Physical Activities:

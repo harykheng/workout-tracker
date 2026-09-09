@@ -12,6 +12,7 @@ import { useElapsed } from './hooks/useStore.jsx';
 import { fmtDuration } from './lib/date.js';
 import { getDay } from './data/schedule.js';
 import { IconPlay } from './components/ui/Icons.jsx';
+import { UpdatePrompt } from './components/PWAPrompts.jsx';
 
 function Shell() {
   const { state } = useStore();
@@ -35,7 +36,8 @@ function Shell() {
   return (
     <RestTimerProvider settings={state.settings}>
       <div className="min-h-screen bg-ink-900 text-white">
-        <main className="mx-auto max-w-md px-4 pt-4 pb-32">
+        <UpdatePrompt />
+        <main className="mx-auto max-w-md px-4 pb-32 safe-top">
           {detail ? (
             <WorkoutDetail key={detail} dayId={detail} onBack={() => setDetail(null)} />
           ) : (

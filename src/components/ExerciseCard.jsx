@@ -159,7 +159,7 @@ export default function ExerciseCard({ exercise, session, index }) {
                   placeholder={String(prefill(i, 'reps') || exercise.reps).slice(0, 5)}
                   value={set.reps}
                   onChange={(e) => actions.setSetField(exercise.id, i, 'reps', e.target.value)}
-                  className="w-full min-w-0 bg-transparent border border-white/8 rounded-lg px-2 py-1.5 text-[13px] text-center tabular outline-none focus:border-lime-accent/60 transition"
+                  className="w-full min-w-0 bg-transparent border border-white/8 rounded-lg px-1.5 py-1.5 text-center tabular outline-none focus:border-lime-accent/60 transition"
                   aria-label={`Reps set ${i + 1}`}
                 />
                 <span className="text-white/20 text-xs">×</span>
@@ -170,7 +170,7 @@ export default function ExerciseCard({ exercise, session, index }) {
                   placeholder={String(prefill(i, 'weight') || 'kg')}
                   value={set.weight}
                   onChange={(e) => actions.setSetField(exercise.id, i, 'weight', e.target.value)}
-                  className="w-full min-w-0 bg-transparent border border-white/8 rounded-lg px-2 py-1.5 text-[13px] text-center tabular outline-none focus:border-lime-accent/60 transition"
+                  className="w-full min-w-0 bg-transparent border border-white/8 rounded-lg px-1.5 py-1.5 text-center tabular outline-none focus:border-lime-accent/60 transition"
                   aria-label={`Beban set ${i + 1} (kg)`}
                 />
 

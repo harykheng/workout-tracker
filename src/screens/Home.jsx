@@ -457,7 +457,7 @@ export function SpecialLogSheet({ day, onClose, onSave }) {
               <select
                 value={values[f.key] || f.options[0]}
                 onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-lime-accent/60 transition"
+                className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 outline-none focus:border-lime-accent/60 transition"
               >
                 {f.options.map((o) => (
                   <option key={o} value={o}>
@@ -471,7 +471,7 @@ export function SpecialLogSheet({ day, onClose, onSave }) {
                 placeholder={f.placeholder}
                 value={values[f.key] || ''}
                 onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-lime-accent/60 transition"
+                className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 outline-none focus:border-lime-accent/60 transition"
               />
             ) : (
               <div className="relative">
@@ -481,7 +481,7 @@ export function SpecialLogSheet({ day, onClose, onSave }) {
                   placeholder={f.placeholder}
                   value={values[f.key] || ''}
                   onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                  className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm tabular outline-none focus:border-lime-accent/60 transition"
+                  className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 tabular outline-none focus:border-lime-accent/60 transition"
                 />
                 {f.unit && <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-muted">{f.unit}</span>}
               </div>
@@ -502,7 +502,7 @@ export function SpecialLogSheet({ day, onClose, onSave }) {
             placeholder={autoKcal > 0 ? String(autoKcal) : 'isi durasi dulu'}
             value={values.kcal || ''}
             onChange={(e) => setValues((v) => ({ ...v, kcal: e.target.value }))}
-            className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm tabular outline-none focus:border-lime-accent/60 transition"
+            className="w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 tabular outline-none focus:border-lime-accent/60 transition"
           />
           <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-muted">kcal</span>
         </div>

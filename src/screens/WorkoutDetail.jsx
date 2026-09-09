@@ -295,7 +295,7 @@ export default function WorkoutDetail({ dayId, onBack }) {
                   placeholder={String(sessionKcal({ ...active, durationSec: elapsed, kcal: null }, bodyWeight))}
                   value={kcalEdit}
                   onChange={(e) => setKcalEdit(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm tabular outline-none focus:border-lime-accent/60 transition"
+                  className="w-full bg-ink-900 border border-white/8 rounded-xl px-3.5 py-2.5 tabular outline-none focus:border-lime-accent/60 transition"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] text-muted">kcal</span>
               </div>

@@ -198,7 +198,7 @@ export function Input({ className, ...rest }) {
   return (
     <input
       className={cx(
-        'w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-white',
+        'w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-white',
         'placeholder:text-white/25 outline-none focus:border-lime-accent/60 focus:ring-2 focus:ring-lime-accent/15 transition',
         className
       )}
@@ -211,7 +211,7 @@ export function Select({ className, children, ...rest }) {
   return (
     <select
       className={cx(
-        'w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none',
+        'w-full bg-ink-900/80 border border-white/8 rounded-xl px-3.5 py-2.5 text-white outline-none',
         'focus:border-lime-accent/60 focus:ring-2 focus:ring-lime-accent/15 transition appearance-none',
         className
       )}
